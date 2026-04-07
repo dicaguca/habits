@@ -48,6 +48,7 @@ function App() {
             const cloudLoadedRef = useRef(false);
             const cloudSaveTimerRef = useRef(null);
             const cloudSyncStartedRef = useRef(false);
+            const goalsScrollRef = useRef(null);
 
             const [showExportModal, setShowExportModal] = useState(false);
             const [exportMonth, setExportMonth] = useState(new Date().toISOString().slice(0, 7));
@@ -864,9 +865,9 @@ function App() {
                     const target = Number(weekGoals[goal.key]) || 0;
                     return target > 0 && goal.actual >= target;
                 }).length;
-
                 const updateGoal = (goalKey, value) => {
                     const target = Math.max(0, Math.min(7, Number(value) || 0));
+                    const scrollTop = goalsScrollRef.current?.scrollTop || 0;
                     setWeeklyGoals(prev => ({
                         ...prev,
                         [weekKey]: {
@@ -874,6 +875,9 @@ function App() {
                             [goalKey]: target,
                         },
                     }));
+                    requestAnimationFrame(() => {
+                        if (goalsScrollRef.current) goalsScrollRef.current.scrollTop = scrollTop;
+                    });
                 };
 
                 const GoalRow = ({ goal }) => {
@@ -916,7 +920,7 @@ function App() {
                 };
 
                 return (
-                    <div className="fixed inset-0 bg-stone-50 z-50 overflow-y-auto animate-fade-in">
+                    <div ref={goalsScrollRef} className="fixed inset-0 bg-stone-50 z-50 overflow-y-auto animate-fade-in">
                         <div className="max-w-5xl mx-auto px-4 pt-4 pb-24 md:px-8 md:pt-8 md:pb-36">
                             <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4 bg-white p-4 rounded-3xl shadow-sm border border-stone-200">
                                 <h2 className="text-2xl font-bold text-stone-800 flex items-center gap-3">
@@ -1642,6 +1646,10 @@ function App() {
         }
 
 export default App;
+
+
+
+
 
 
 
