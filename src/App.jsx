@@ -1591,42 +1591,42 @@ function App() {
                             </div>
                         </Modal>
                         {/* EXPORT MODAL */}
-                        <Modal isOpen={showExportModal} onClose={() => setShowExportModal(false)} title="Export & Backup">
-                            <div className="space-y-6">
+                        <Modal isOpen={showExportModal} onClose={() => setShowExportModal(false)} title="Export & Backup" maxWidth="max-w-3xl">
+                            <div className="space-y-4">
                                 <div>
-                                    <h4 className="font-bold text-gray-700 mb-3 flex items-center gap-2"><Icons.Download /> Download Markdown Table</h4>
-                                    <div className="bg-gray-50 p-4 rounded-xl space-y-3">
+                                    <h4 className="font-bold text-gray-700 mb-2 flex items-center gap-2"><Icons.Download /> Download Markdown Table</h4>
+                                    <div className="bg-gray-50 p-3 rounded-xl space-y-3">
                                         <div className="flex items-center gap-3">
                                             <span className="text-sm font-bold text-gray-500">For Month:</span>
                                             <input type="month" value={exportMonth} onChange={(e) => setExportMonth(e.target.value)} className="bg-white border rounded-lg px-3 py-1 font-medium" />
                                         </div>
                                         <div className="grid grid-cols-2 gap-3">
-                                            <button onClick={() => downloadFile(generateMarkdown('daily'), `daily_habits_${exportMonth}.md`)} className="bg-brand-orange text-white py-3 rounded-xl font-bold hover:bg-orange-600 transition-colors">Daily Habits</button>
-                                            <button onClick={() => downloadFile(generateMarkdown('pb'), `sadhanas_${exportMonth}.md`)} className="bg-brand-purple text-white py-3 rounded-xl font-bold hover:bg-purple-700 transition-colors">Sadhanas</button>
+                                            <button onClick={() => downloadFile(generateMarkdown('daily'), `daily_habits_${exportMonth}.md`)} className="bg-brand-orange text-white py-2 rounded-xl text-sm font-bold hover:bg-orange-600 transition-colors">Daily Habits</button>
+                                            <button onClick={() => downloadFile(generateMarkdown('pb'), `sadhanas_${exportMonth}.md`)} className="bg-brand-purple text-white py-2 rounded-xl text-sm font-bold hover:bg-purple-700 transition-colors">Sadhanas</button>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="border-t pt-6">
-                                    <h4 className="font-bold text-gray-700 mb-3 flex items-center gap-2"><Icons.Target /> Cloudflare Sync</h4>
-                                    <div className="bg-gray-50 p-4 rounded-xl space-y-3">
-                                        <div className="text-xs font-bold text-stone-500 bg-white border border-stone-100 rounded-lg p-3">
+                                <div className="border-t pt-4">
+                                    <h4 className="font-bold text-gray-700 mb-2 flex items-center gap-2"><Icons.Target /> Cloudflare Sync</h4>
+                                    <div className="bg-gray-50 p-3 rounded-xl space-y-2">
+                                        <div className="text-xs font-bold text-stone-500 bg-white border border-stone-100 rounded-lg p-2">
                                             {syncStatus}
                                         </div>
                                         <div className="grid grid-cols-2 gap-3">
-                                            <button disabled={isSyncing} onClick={() => loadFromCloud({ manual: true })} className="border-2 border-stone-200 text-stone-600 py-3 rounded-xl font-bold hover:bg-stone-50 disabled:opacity-40">Load Cloud</button>
-                                            <button disabled={isSyncing} onClick={() => saveToCloud(getCloudPayload(), { manual: true })} className="bg-brand-mint text-white py-3 rounded-xl font-bold hover:bg-teal-500 disabled:opacity-40">Save Cloud</button>
+                                            <button disabled={isSyncing} onClick={() => loadFromCloud({ manual: true })} className="border-2 border-stone-200 text-stone-600 py-2 rounded-xl text-sm font-bold hover:bg-stone-50 disabled:opacity-40">Load Cloud</button>
+                                            <button disabled={isSyncing} onClick={() => saveToCloud(getCloudPayload(), { manual: true })} className="bg-brand-mint text-white py-2 rounded-xl text-sm font-bold hover:bg-teal-500 disabled:opacity-40">Save Cloud</button>
                                         </div>
                                         <p className="text-xs text-stone-400 leading-relaxed">
                                             Syncs with sadhanas-api using the cloud key <span className="font-mono">habits</span>. Local browser backup stays on.
                                         </p>
                                     </div>
                                 </div>
-                                <div className="border-t pt-6">
-                                    <h4 className="font-bold text-gray-700 mb-3 flex items-center gap-2"><Icons.Upload /> Full Data Backup</h4>
+                                <div className="border-t pt-4">
+                                    <h4 className="font-bold text-gray-700 mb-2 flex items-center gap-2"><Icons.Upload /> Full Data Backup</h4>
                                     <div className="grid grid-cols-2 gap-3">
-                                        <button onClick={handleBackup} className="border-2 border-stone-200 text-stone-600 py-3 rounded-xl font-bold hover:bg-stone-50">Download Backup (.json)</button>
-                                        <label className="border-2 border-stone-200 text-stone-600 py-3 rounded-xl font-bold hover:bg-stone-50 cursor-pointer text-center">
+                                        <button onClick={handleBackup} className="border-2 border-stone-200 text-stone-600 py-2 rounded-xl text-sm font-bold hover:bg-stone-50">Download Backup (.json)</button>
+                                        <label className="border-2 border-stone-200 text-stone-600 py-2 rounded-xl text-sm font-bold hover:bg-stone-50 cursor-pointer text-center">
                                             Restore Backup
                                             <input type="file" className="hidden" accept=".json" onChange={handleRestore} />
                                         </label>
@@ -1641,6 +1641,11 @@ function App() {
         }
 
 export default App;
+
+
+
+
+
 
 
 
