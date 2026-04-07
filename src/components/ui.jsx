@@ -134,11 +134,11 @@ const Icons = {
             </div>
         );
 
-        const Modal = ({ isOpen, onClose, title, children }) => {
+        const Modal = ({ isOpen, onClose, title, children, maxWidth = 'max-w-lg' }) => {
             if (!isOpen) return null;
             return (
                 <div className="fixed inset-0 modal-overlay flex items-center justify-center z-50 px-4 pt-8 pb-16 md:pt-10 md:pb-20">
-                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden slide-up max-h-[90vh] overflow-y-auto">
+                    <div className={`bg-white rounded-3xl shadow-2xl w-full ${maxWidth} overflow-hidden slide-up max-h-[90vh] overflow-y-auto`}>
                         <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50 sticky top-0 z-10">
                             <h3 className="text-xl font-bold text-gray-800">{title}</h3>
                             <button onClick={onClose} className="p-2 hover:bg-gray-200 rounded-full"><Icons.X /></button>
@@ -152,6 +152,7 @@ const Icons = {
         };
 
 export { Icons, ProgressBar, StackedBar, SimpleBarChart, Toggle, NumberInput, Modal };
+
 
 
 
