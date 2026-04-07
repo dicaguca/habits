@@ -797,7 +797,7 @@ function App() {
                 const currentWeekStart = currentGoalsWeekStart;
                 const setCurrentWeekStart = setCurrentGoalsWeekStart;
 
-                const weekDates = useMemo(() => {
+                const weekDates = (() => {
                     const days = [];
                     const start = new Date(currentWeekStart);
                     for (let i = 0; i < 7; i++) {
@@ -806,17 +806,17 @@ function App() {
                         days.push(getLocalDateString(d));
                     }
                     return days;
-                }, [currentWeekStart]);
+                })();
 
                 const weekKey = getLocalDateString(currentWeekStart);
                 const weekGoals = weeklyGoals[weekKey] || {};
 
-                const weekLabel = useMemo(() => {
+                const weekLabel = (() => {
                     const end = new Date(currentWeekStart);
                     end.setDate(end.getDate() + 6);
                     const opt = { month: 'short', day: 'numeric' };
                     return `${currentWeekStart.toLocaleDateString('en-US', opt)} - ${end.toLocaleDateString('en-US', opt)}`;
-                }, [currentWeekStart]);
+                })();
 
                 const shiftWeek = (weeks) => {
                     const newStart = new Date(currentWeekStart);
@@ -1245,7 +1245,7 @@ function App() {
             if (showComparison) return <ComparisonScreen />;
             if (showReview) return <ReviewScreen />;
             if (showWeekly) return <WeeklyScreen />;
-            if (showGoals) return <WeeklyGoalsScreen />;
+            if (showGoals) return WeeklyGoalsScreen();
 
             // --- MAIN APP SCREEN ---
             return (
@@ -1646,6 +1646,7 @@ function App() {
         }
 
 export default App;
+
 
 
 
