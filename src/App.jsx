@@ -285,7 +285,7 @@ function App() {
                 if (!status) return null;
                 const label = status === 'early' ? earlyLabel : lateLabel;
                 const colorClass = status === 'early' ? earlyClass : lateClass;
-                return <span className={`text-xs ${colorClass} px-2 py-1 rounded-full font-bold`}>{label}</span>;
+                return <span className={`text-xs ${colorClass} px-2 py-1 rounded-md font-bold`}>{label}</span>;
             };
             const calculateTrends = () => {
                 const allDates = [...new Set([...Object.keys(dailyLogs), ...Object.keys(pbLogs)])];
@@ -1458,7 +1458,7 @@ function App() {
                                     <div className="space-y-3 mb-6">
                                         <div className="flex justify-between items-center mb-2">
                                             <label className="text-sm font-bold text-stone-500 uppercase">SDR Completed</label>
-                                            {statusBadge(getShutdownRoutineStatus(currentDaily), { earlyLabel: '\u{1F319} Early', earlyClass: 'bg-brand-purple/20 text-brand-purple border border-brand-purple/30', lateClass: 'bg-brand-blue/30 text-blue-800' })}
+                                            {statusBadge(getShutdownRoutineStatus(currentDaily), { earlyLabel: '\u{1F989} Good Owl', earlyClass: 'bg-brand-periwinkle/30 text-stone-700', lateClass: 'bg-brand-blue/30 text-blue-800' })}
                                         </div>
                                         <input
                                             type="time"
@@ -1471,7 +1471,7 @@ function App() {
                                     <div className="mb-6">
                                         <div className="flex justify-between items-center mb-2">
                                             <label className="text-sm font-bold text-stone-500 uppercase">Workday End</label>
-                                            {statusBadge(getWorkdayEndStatus(currentDaily), { earlyLabel: '\u{1F319} Early', earlyClass: 'bg-brand-purple/20 text-brand-purple border border-brand-purple/30', lateClass: 'bg-brand-blue/30 text-blue-800' })}
+                                            {statusBadge(getWorkdayEndStatus(currentDaily), { earlyLabel: '\u{1F989} Good Owl', earlyClass: 'bg-brand-periwinkle/30 text-stone-700', lateClass: 'bg-brand-blue/30 text-blue-800' })}
                                         </div>
                                         <input
                                             type="time"
@@ -1635,6 +1635,7 @@ function App() {
         }
 
 export default App;
+
 
 
 
