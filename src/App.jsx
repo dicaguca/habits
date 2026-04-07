@@ -1373,9 +1373,6 @@ function App() {
                                                 N/A
                                             </button>
                                         </div>
-                                        <div className="text-xs text-stone-400 font-bold uppercase tracking-wider">
-                                            Earlier than 9:50 AM counts as early.
-                                        </div>
                                     </div>
 
 
@@ -1461,7 +1458,7 @@ function App() {
                                     <div className="space-y-3 mb-6">
                                         <div className="flex justify-between items-center mb-2">
                                             <label className="text-sm font-bold text-stone-500 uppercase">SDR Completed</label>
-                                            {statusBadge(getShutdownRoutineStatus(currentDaily), { earlyLabel: '\u{1F319} Early', lateClass: 'bg-brand-blue/30 text-blue-800' })}
+                                            {statusBadge(getShutdownRoutineStatus(currentDaily), { earlyLabel: '\u{1F319} Early', earlyClass: 'bg-brand-purple/30 text-purple-800', lateClass: 'bg-brand-blue/30 text-blue-800' })}
                                         </div>
                                         <input
                                             type="time"
@@ -1469,15 +1466,12 @@ function App() {
                                             onChange={(e) => updateDaily({ sdr: { ...currentDaily.sdr, time: e.target.value } })}
                                             className="w-full p-3 rounded-xl border-2 font-bold text-lg outline-none focus:border-brand-purple bg-white text-stone-800"
                                         />
-                                        <div className="text-xs text-stone-400 font-bold uppercase tracking-wider">
-                                            Earlier than 10:45 PM counts as early.
-                                        </div>
                                     </div>
 
                                     <div className="mb-6">
                                         <div className="flex justify-between items-center mb-2">
                                             <label className="text-sm font-bold text-stone-500 uppercase">Workday End</label>
-                                            {statusBadge(getWorkdayEndStatus(currentDaily), { earlyLabel: '\u{1F319} Early', lateClass: 'bg-brand-blue/30 text-blue-800' })}
+                                            {statusBadge(getWorkdayEndStatus(currentDaily), { earlyLabel: '\u{1F319} Early', earlyClass: 'bg-brand-purple/30 text-purple-800', lateClass: 'bg-brand-blue/30 text-blue-800' })}
                                         </div>
                                         <input
                                             type="time"
@@ -1641,6 +1635,9 @@ function App() {
         }
 
 export default App;
+
+
+
 
 
 
