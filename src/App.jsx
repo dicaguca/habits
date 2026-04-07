@@ -167,6 +167,7 @@ function App() {
                 sdr: { ...INITIAL_DAILY.sdr, ...(selectedDailyLog.sdr || {}) },
                 sleep: { ...INITIAL_DAILY.sleep, ...(selectedDailyLog.sleep || {}) },
                 morningHabits: { ...INITIAL_DAILY.morningHabits, ...(selectedDailyLog.morningHabits || {}) },
+                workdayStartNA: selectedDailyLog.workdayStartNA ?? selectedDailyLog.isWeekend ?? INITIAL_DAILY.workdayStartNA,
             };
             const currentPB = pbLogs[selectedDate] || INITIAL_PB;
             const squareIconButtonClass = 'bg-white hover:bg-stone-50 text-stone-700 w-12 h-12 rounded-xl shadow-sm border border-stone-200 flex items-center justify-center transition-all';
@@ -247,7 +248,7 @@ function App() {
                 return 'NO';
             };
 
-            const getWorkdayStartMinutes = (log) => log?.isWeekend ? null : timeStrToMinutes(log?.workday);
+            const getWorkdayStartMinutes = (log) => (log?.workdayStartNA ?? log?.isWeekend) ? null : timeStrToMinutes(log?.workday);
             const isWorkdayStartDone = (log) => getWorkdayStartMinutes(log) !== null;
             const isWorkdayStartEarly = (log) => {
                 const mins = getWorkdayStartMinutes(log);
@@ -256,7 +257,7 @@ function App() {
             const getWorkdayStartStatus = (log) => isWorkdayStartDone(log) ? (isWorkdayStartEarly(log) ? 'early' : 'late') : null;
 
             const getShutdownRoutineMinutes = (log) => timeStrToMinutes(log?.sdr?.time);
-            const isShutdownRoutineDone = (log) => getShutdownRoutineMinutes(log) !== null || Boolean(log?.sdr?.done);
+            const isShutdownRoutineDone = (log) => !log?.sdr?.na && (getShutdownRoutineMinutes(log) !== null || Boolean(log?.sdr?.done));
             const isShutdownRoutineEarly = (log) => {
                 const mins = getShutdownRoutineMinutes(log);
                 if (mins !== null) return mins < SHUTDOWN_ROUTINE_EARLY_CUTOFF;
@@ -264,6 +265,7 @@ function App() {
             };
             const getShutdownRoutineStatus = (log) => isShutdownRoutineDone(log) ? (isShutdownRoutineEarly(log) ? 'early' : 'late') : null;
             const getShutdownRoutineDisplay = (log) => {
+                if (log?.sdr?.na) return 'N/A';
                 if (getShutdownRoutineMinutes(log) !== null) {
                     return isShutdownRoutineEarly(log) ? 'EARLY ' + log.sdr.time : 'LATE ' + log.sdr.time;
                 }
@@ -274,7 +276,7 @@ function App() {
             };
 
             const getWorkdayEndMinutes = (log) => timeStrToMinutes(log?.workdayEnd);
-            const isWorkdayEndDone = (log) => getWorkdayEndMinutes(log) !== null;
+            const isWorkdayEndDone = (log) => !log?.workdayEndNA && getWorkdayEndMinutes(log) !== null;
             const isWorkdayEndEarly = (log) => {
                 const mins = getWorkdayEndMinutes(log);
                 return mins !== null ? mins < WORKDAY_END_EARLY_CUTOFF : false;
@@ -505,7 +507,7 @@ function App() {
                     dates.forEach(date => {
                         const l = dailyLogs[date];
                         const dateStr = new Date(date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-                        md += `| ${dateStr} | ${l.isWeekend ? 'N/A' : (l.workday || '')} | ${getMorningRoutineDisplay(l)} | ${l.mr.count > 0 ? l.mr.count + '/14' : ''} | ${getShutdownRoutineDisplay(l)} | ${l.sdr.count > 0 ? l.sdr.count + '/9' : ''} | ${l.sleep.lights ? 'YES' : 'NO'} | ${l.sleep.tv ? 'YES' : 'NO'} | ${l.sleep.noLSIB ? 'YES' : 'NO'} | ${l.sleep.bedtime ? 'YES' : 'NO'} |\n`;
+                        md += `| ${dateStr} | ${(l.workdayStartNA ?? l.isWeekend) ? 'N/A' : (l.workday || '')} | ${getMorningRoutineDisplay(l)} | ${l.mr.count > 0 ? l.mr.count + '/14' : ''} | ${getShutdownRoutineDisplay(l)} | ${l.sdr.count > 0 ? l.sdr.count + '/9' : ''} | ${l.sleep.lights ? 'YES' : 'NO'} | ${l.sleep.tv ? 'YES' : 'NO'} | ${l.sleep.noLSIB ? 'YES' : 'NO'} | ${l.sleep.bedtime ? 'YES' : 'NO'} |\n`;
                     });
                     return md;
                 } else {
@@ -1385,13 +1387,13 @@ function App() {
                                             <input
                                                 type="time"
                                                 value={currentDaily.workday}
-                                                disabled={currentDaily.isWeekend}
-                                                onChange={(e) => updateDaily({ workday: e.target.value })}
-                                                className={`flex-1 p-3 rounded-xl border-2 font-bold text-lg outline-none focus:border-brand-orange ${currentDaily.isWeekend ? 'bg-stone-100 text-stone-400' : 'bg-white text-stone-800'}`}
+                                                disabled={currentDaily.workdayStartNA}
+                                                onChange={(e) => updateDaily({ workdayStartNA: false, workday: e.target.value })}
+                                                className={`flex-1 p-3 rounded-xl border-2 font-bold text-lg outline-none focus:border-brand-orange ${currentDaily.workdayStartNA ? 'bg-stone-100 text-stone-400' : 'bg-white text-stone-800'}`}
                                             />
                                             <button
-                                                onClick={() => updateDaily({ isWeekend: !currentDaily.isWeekend, workday: '' })}
-                                                className={`px-4 rounded-xl font-bold border-2 transition-colors ${currentDaily.isWeekend ? 'bg-stone-600 text-white border-stone-600' : 'bg-white text-stone-400 border-stone-200'}`}
+                                                onClick={() => updateDaily({ workdayStartNA: !currentDaily.workdayStartNA, workday: '' })}
+                                                className={`px-4 rounded-xl font-bold border-2 transition-colors ${currentDaily.workdayStartNA ? 'bg-stone-600 text-white border-stone-600' : 'bg-white text-stone-400 border-stone-200'}`}
                                             >
                                                 N/A
                                             </button>
@@ -1460,12 +1462,21 @@ function App() {
                                             <label className="text-sm font-bold text-stone-500 uppercase">SDR Completed</label>
                                             {statusBadge(getShutdownRoutineStatus(currentDaily), { earlyLabel: '\u{1F989} Good Owl', earlyClass: 'bg-brand-periwinkle/30 text-stone-700', lateClass: 'bg-brand-blue/30 text-blue-800' })}
                                         </div>
-                                        <input
-                                            type="time"
-                                            value={currentDaily.sdr.time}
-                                            onChange={(e) => updateDaily({ sdr: { ...currentDaily.sdr, time: e.target.value } })}
-                                            className="w-full p-3 rounded-xl border-2 font-bold text-lg outline-none focus:border-brand-purple bg-white text-stone-800"
-                                        />
+                                        <div className="flex gap-2">
+                                            <input
+                                                type="time"
+                                                value={currentDaily.sdr.time}
+                                                disabled={currentDaily.sdr.na}
+                                                onChange={(e) => updateDaily({ sdr: { ...currentDaily.sdr, na: false, time: e.target.value } })}
+                                                className={`flex-1 p-3 rounded-xl border-2 font-bold text-lg outline-none focus:border-brand-purple ${currentDaily.sdr.na ? 'bg-stone-100 text-stone-400' : 'bg-white text-stone-800'}`}
+                                            />
+                                            <button
+                                                onClick={() => updateDaily({ sdr: { ...currentDaily.sdr, na: !currentDaily.sdr.na, time: '' } })}
+                                                className={`px-4 rounded-xl font-bold border-2 transition-colors ${currentDaily.sdr.na ? 'bg-stone-600 text-white border-stone-600' : 'bg-white text-stone-400 border-stone-200'}`}
+                                            >
+                                                N/A
+                                            </button>
+                                        </div>
                                     </div>
 
                                     <div className="mb-6">
@@ -1473,12 +1484,21 @@ function App() {
                                             <label className="text-sm font-bold text-stone-500 uppercase">Workday End</label>
                                             {statusBadge(getWorkdayEndStatus(currentDaily), { earlyLabel: '\u{1F989} Good Owl', earlyClass: 'bg-brand-periwinkle/30 text-stone-700', lateClass: 'bg-brand-blue/30 text-blue-800' })}
                                         </div>
-                                        <input
-                                            type="time"
-                                            value={currentDaily.workdayEnd || ''}
-                                            onChange={(e) => updateDaily({ workdayEnd: e.target.value })}
-                                            className="w-full p-3 rounded-xl border-2 font-bold text-lg outline-none focus:border-brand-purple bg-white text-stone-800"
-                                        />
+                                        <div className="flex gap-2">
+                                            <input
+                                                type="time"
+                                                value={currentDaily.workdayEnd || ''}
+                                                disabled={currentDaily.workdayEndNA}
+                                                onChange={(e) => updateDaily({ workdayEndNA: false, workdayEnd: e.target.value })}
+                                                className={`flex-1 p-3 rounded-xl border-2 font-bold text-lg outline-none focus:border-brand-purple ${currentDaily.workdayEndNA ? 'bg-stone-100 text-stone-400' : 'bg-white text-stone-800'}`}
+                                            />
+                                            <button
+                                                onClick={() => updateDaily({ workdayEndNA: !currentDaily.workdayEndNA, workdayEnd: '' })}
+                                                className={`px-4 rounded-xl font-bold border-2 transition-colors ${currentDaily.workdayEndNA ? 'bg-stone-600 text-white border-stone-600' : 'bg-white text-stone-400 border-stone-200'}`}
+                                            >
+                                                N/A
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -1635,6 +1655,16 @@ function App() {
         }
 
 export default App;
+
+
+
+
+
+
+
+
+
+
 
 
 

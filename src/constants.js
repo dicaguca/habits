@@ -1,9 +1,10 @@
 const INITIAL_DAILY = {
             workday: '',
+            workdayStartNA: false,
             workdayEnd: '',
-            isWeekend: false,
+            workdayEndNA: false,
             mr: { time: '', na: false, count: 0 },
-            sdr: { time: '', count: 0 },
+            sdr: { time: '', na: false, count: 0 },
             sleep: { lights: false, tv: false, noLSIB: false, bedtime: false },
             morningHabits: {
                 brushTeeth: false,
@@ -22,6 +23,8 @@ const INITIAL_DAILY = {
         };
 
 export { INITIAL_DAILY, INITIAL_PB };
+
+
 
 
 
