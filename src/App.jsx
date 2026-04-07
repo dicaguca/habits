@@ -305,7 +305,7 @@ function App() {
                     let mrTotalActs = 0, sdrTotalActs = 0;
 
                     let lightsCount = 0, tvCount = 0, lsibCount = 0, bedCount = 0;
-                    let brushTeethCount = 0, faceCareCount = 0, pregabalinVitaminsCount = 0, makeBedCleanRoomCount = 0, pdmJournalCount = 0;
+                    let brushTeethCount = 0, faceCareCount = 0, pregabalinVitaminsCount = 0, makeBedCleanRoomCount = 0;
 
                     dailyDates.forEach(d => {
                         const log = dailyLogs[d];
@@ -339,7 +339,6 @@ function App() {
                         if (log?.morningHabits?.faceCare) faceCareCount++;
                         if (log?.morningHabits?.pregabalinVitamins) pregabalinVitaminsCount++;
                         if (log?.morningHabits?.makeBedCleanRoom) makeBedCleanRoomCount++;
-                        if (log?.morningHabits?.pdmJournal) pdmJournalCount++;
                     });
 
                     const workdayTimes = dailyDates
@@ -401,7 +400,6 @@ function App() {
                         faceCare: Math.round((faceCareCount / totalDailyDays) * 100),
                         pregabalinVitamins: Math.round((pregabalinVitaminsCount / totalDailyDays) * 100),
                         makeBedCleanRoom: Math.round((makeBedCleanRoomCount / totalDailyDays) * 100),
-                        pdmJournal: Math.round((pdmJournalCount / totalDailyDays) * 100),
                         moment: Math.round((momentCount / totalPbDays) * 100),
                         meditation: Math.round((meditationCount / totalPbDays) * 100),
                         stretch: Math.round((stretchCount / totalPbDays) * 100),
@@ -459,7 +457,7 @@ function App() {
                 const workdayEndLate = dailyDates.filter(d => getWorkdayEndStatus(dailyLogs[d]) === 'late').length;
 
                 let lights = 0, tv = 0, lsib = 0, bed = 0;
-                let morningHabits = { brushTeeth: 0, faceCare: 0, pregabalinVitamins: 0, makeBedCleanRoom: 0, pdmJournal: 0 };
+                let morningHabits = { brushTeeth: 0, faceCare: 0, pregabalinVitamins: 0, makeBedCleanRoom: 0 };
                 dailyDates.forEach(d => {
                     const log = dailyLogs[d];
                     if (log?.sleep?.lights) lights++;
@@ -470,7 +468,6 @@ function App() {
                     if (log?.morningHabits?.faceCare) morningHabits.faceCare++;
                     if (log?.morningHabits?.pregabalinVitamins) morningHabits.pregabalinVitamins++;
                     if (log?.morningHabits?.makeBedCleanRoom) morningHabits.makeBedCleanRoom++;
-                    if (log?.morningHabits?.pdmJournal) morningHabits.pdmJournal++;
                 });
 
                 let pbCounts = { moment: 0, meditation: 0, stretch: 0, rooting: 0 };
@@ -762,7 +759,6 @@ function App() {
                                         <WeeklyRow label="Face-care routine" dates={weekDates} logs={dailyLogs} checkFn={l => l.morningHabits?.faceCare} colorClass="brand-yellow" />
                                         <WeeklyRow label="Pregabalin & vitamins" dates={weekDates} logs={dailyLogs} checkFn={l => l.morningHabits?.pregabalinVitamins} colorClass="brand-pink" />
                                         <WeeklyRow label="Make bed & clean room" dates={weekDates} logs={dailyLogs} checkFn={l => l.morningHabits?.makeBedCleanRoom} colorClass="brand-teal" />
-                                        <WeeklyRow label="PDM journal" dates={weekDates} logs={dailyLogs} checkFn={l => l.morningHabits?.pdmJournal} colorClass="brand-purple" />
                                     </div>
                                 )}
                                 {weeklyTab === 'night' && (
@@ -838,7 +834,6 @@ function App() {
                         { key: 'faceCare', label: 'Face-care routine', actual: countDaily(log => log.morningHabits?.faceCare), color: 'from-brand-yellow to-brand-orange' },
                         { key: 'pregabalinVitamins', label: 'Pregabalin & vitamins', actual: countDaily(log => log.morningHabits?.pregabalinVitamins), color: 'from-brand-salmon to-brand-pink' },
                         { key: 'makeBedCleanRoom', label: 'Make bed & clean room', actual: countDaily(log => log.morningHabits?.makeBedCleanRoom), color: 'from-brand-mint to-brand-teal' },
-                        { key: 'pdmJournal', label: 'PDM journal', actual: countDaily(log => log.morningHabits?.pdmJournal), color: 'from-brand-purple to-brand-periwinkle' },
                     ],
                     night: [
                         { key: 'sdrEarly', label: 'SDR Completed Early', actual: countDaily(log => getShutdownRoutineStatus(log) === 'early'), color: 'from-brand-purple to-brand-periwinkle' },
@@ -1035,7 +1030,6 @@ function App() {
                                         <SimpleBarChart title="Face-care routine" data={trends.map(t => ({ label: t.label, value: t.faceCare }))} color="bg-brand-yellow" chartMax={100} />
                                         <SimpleBarChart title="Pregabalin & vitamins" data={trends.map(t => ({ label: t.label, value: t.pregabalinVitamins }))} color="bg-gradient-to-r from-brand-salmon to-brand-pink" chartMax={100} />
                                         <SimpleBarChart title="Make bed & clean room" data={trends.map(t => ({ label: t.label, value: t.makeBedCleanRoom }))} color="bg-gradient-to-r from-brand-mint to-brand-teal" chartMax={100} />
-                                        <SimpleBarChart title="PDM journal" data={trends.map(t => ({ label: t.label, value: t.pdmJournal }))} color="bg-gradient-to-r from-brand-purple to-brand-periwinkle" chartMax={100} />
                                     </div>
                                 </div>
                             </div>
@@ -1180,7 +1174,6 @@ function App() {
                                         <ProgressBar label="Face-care routine" value={reviewStats.morningHabits.faceCare} max={reviewStats.totalDays} gradient="bg-brand-yellow" subLabel={`${reviewStats.morningHabits.faceCare}/${reviewStats.totalDays}`} />
                                         <ProgressBar label="Pregabalin & vitamins" value={reviewStats.morningHabits.pregabalinVitamins} max={reviewStats.totalDays} gradient="bg-gradient-to-r from-brand-salmon to-brand-pink" subLabel={`${reviewStats.morningHabits.pregabalinVitamins}/${reviewStats.totalDays}`} />
                                         <ProgressBar label="Make bed & clean room" value={reviewStats.morningHabits.makeBedCleanRoom} max={reviewStats.totalDays} gradient="bg-gradient-to-r from-brand-mint to-brand-teal" subLabel={`${reviewStats.morningHabits.makeBedCleanRoom}/${reviewStats.totalDays}`} />
-                                        <ProgressBar label="PDM journal" value={reviewStats.morningHabits.pdmJournal} max={reviewStats.totalDays} gradient="bg-gradient-to-r from-brand-purple to-brand-periwinkle" subLabel={`${reviewStats.morningHabits.pdmJournal}/${reviewStats.totalDays}`} />
                                     </div>
                                 </div>
                             </div>
@@ -1430,12 +1423,6 @@ function App() {
                                             onChange={(val) => updateDaily({ morningHabits: { ...currentDaily.morningHabits, makeBedCleanRoom: val } })}
                                             activeClass="border-brand-teal"
                                         />
-                                        <Toggle
-                                            label="PDM journal"
-                                            checked={currentDaily.morningHabits.pdmJournal}
-                                            onChange={(val) => updateDaily({ morningHabits: { ...currentDaily.morningHabits, pdmJournal: val } })}
-                                            activeClass="border-brand-purple"
-                                        />
                                     </div>
                                 </div>
                             </div>
@@ -1655,6 +1642,7 @@ function App() {
         }
 
 export default App;
+
 
 
 

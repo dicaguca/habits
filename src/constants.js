@@ -11,7 +11,6 @@ const INITIAL_DAILY = {
                 faceCare: false,
                 pregabalinVitamins: false,
                 makeBedCleanRoom: false,
-                pdmJournal: false,
             }
         };
 
@@ -23,6 +22,7 @@ const INITIAL_DAILY = {
         };
 
 export { INITIAL_DAILY, INITIAL_PB };
+
 
 
 
