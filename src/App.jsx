@@ -290,8 +290,59 @@ function App() {
                 const colorClass = status === 'early' ? earlyClass : lateClass;
                 return <span className={`text-xs ${colorClass} px-2 py-1 rounded-md font-bold`}>{label}</span>;
             };
+            const getWeekDatesFromKey = (weekKey) => {
+                const days = [];
+                const start = new Date(weekKey);
+                for (let i = 0; i < 7; i++) {
+                    const d = new Date(start);
+                    d.setDate(start.getDate() + i);
+                    days.push(getLocalDateString(d));
+                }
+                return days;
+            };
+
+            const getWeeklyGoalAchievement = (tab, weekKey) => {
+                const goals = weeklyGoals[weekKey] || {};
+                const weekDates = getWeekDatesFromKey(weekKey);
+                const countDaily = (checkFn) => weekDates.filter(date => checkFn(dailyLogs[date] || INITIAL_DAILY)).length;
+                const countPb = (checkFn) => weekDates.filter(date => checkFn(pbLogs[date] || INITIAL_PB)).length;
+
+                const goalSections = {
+                    morning: [
+                        { key: 'mrEarly', actual: countDaily(log => getMorningRoutineStatus(log) === 'early') },
+                        { key: 'workdayStartEarly', actual: countDaily(log => getWorkdayStartStatus(log) === 'early') },
+                        { key: 'brushTeeth', actual: countDaily(log => log.morningHabits?.brushTeeth) },
+                        { key: 'faceCare', actual: countDaily(log => log.morningHabits?.faceCare) },
+                        { key: 'pregabalinVitamins', actual: countDaily(log => log.morningHabits?.pregabalinVitamins) },
+                        { key: 'makeBedCleanRoom', actual: countDaily(log => log.morningHabits?.makeBedCleanRoom) },
+                    ],
+                    night: [
+                        { key: 'sdrEarly', actual: countDaily(log => getShutdownRoutineStatus(log) === 'early') },
+                        { key: 'workdayEndEarly', actual: countDaily(log => getWorkdayEndStatus(log) === 'early') },
+                        { key: 'sleepLights', actual: countDaily(log => log.sleep?.lights) },
+                        { key: 'noTv', actual: countDaily(log => log.sleep?.tv) },
+                        { key: 'noLateSnacks', actual: countDaily(log => log.sleep?.noLSIB) },
+                        { key: 'bedtime', actual: countDaily(log => log.sleep?.bedtime) },
+                    ],
+                    sadhanas: [
+                        { key: 'moment', actual: countPb(log => log.moment) },
+                        { key: 'meditation', actual: countPb(log => log.meditation) },
+                        { key: 'stretch', actual: countPb(log => log.stretch) },
+                        { key: 'rooting', actual: countPb(log => log.rooting) },
+                    ],
+                };
+
+                const sectionGoals = goalSections[tab] || [];
+                const totalTarget = sectionGoals.reduce((sum, goal) => sum + (Number(goals[goal.key]) || 0), 0);
+                if (totalTarget === 0) return null;
+                const totalCompleted = sectionGoals.reduce((sum, goal) => {
+                    const target = Number(goals[goal.key]) || 0;
+                    return sum + (target > 0 ? Math.min(goal.actual, target) : 0);
+                }, 0);
+                return Math.round((totalCompleted / totalTarget) * 100);
+            };
             const calculateTrends = () => {
-                const allDates = [...new Set([...Object.keys(dailyLogs), ...Object.keys(pbLogs)])];
+                const allDates = [...new Set([...Object.keys(dailyLogs), ...Object.keys(pbLogs), ...Object.keys(weeklyGoals)])];
                 const months = [...new Set(allDates.map(d => d.slice(0, 7)))].sort();
 
                 return months.map(m => {
@@ -299,6 +350,11 @@ function App() {
                     const pbDates = Object.keys(pbLogs).filter(d => d.startsWith(m));
                     const totalDailyDays = dailyDates.length || 1;
                     const totalPbDays = pbDates.length || 1;
+                    const goalWeeks = Object.keys(weeklyGoals).filter(d => d.startsWith(m));
+                    const averageGoalAchievement = (tab) => {
+                        const values = goalWeeks.map(weekKey => getWeeklyGoalAchievement(tab, weekKey)).filter(v => v !== null);
+                        return values.length ? Math.round(values.reduce((a, b) => a + b, 0) / values.length) : 0;
+                    };
 
                     let mrCount = 0, mrEarlyCount = 0, sdrCount = 0, sdrEarlyCount = 0;
                     let workdayStartCount = 0, workdayStartEarlyCount = 0, workdayEndCount = 0, workdayEndEarlyCount = 0;
@@ -381,6 +437,9 @@ function App() {
 
                     return {
                         label: shortMonth,
+                        morningGoals: averageGoalAchievement('morning'),
+                        nightGoals: averageGoalAchievement('night'),
+                        sadhanasGoals: averageGoalAchievement('sadhanas'),
                         workdayAvgMin,
                         workdayEndAvgMin,
                         workdayEarly: Math.round((workdayStartEarlyCount / totalDailyDays) * 100),
@@ -408,7 +467,7 @@ function App() {
                     };
                 });
             };
-            const trends = useMemo(() => calculateTrends(), [dailyLogs, pbLogs]);
+            const trends = useMemo(() => calculateTrends(), [dailyLogs, pbLogs, weeklyGoals]);
 
             const getReviewStats = (month) => {
                 const dailyDates = Object.keys(dailyLogs).filter(d => d.startsWith(month));
@@ -1016,13 +1075,19 @@ function App() {
                         {trendsTab === 'morning' && (
                             <div className="space-y-8">
                                 <div>
+                                    <h3 className="text-sm font-extrabold text-stone-400 uppercase tracking-[0.22em] mb-5 border-b border-stone-200 pb-2">Weekly Goals</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <SimpleBarChart title="Goals Achieved" data={trends.map(t => ({ label: t.label, value: t.morningGoals }))} color="bg-gradient-to-r from-brand-orange to-brand-salmon" chartMax={100} />
+                                    </div>
+                                </div>
+                                <div>
                                     <h3 className="text-sm font-extrabold text-stone-400 uppercase tracking-[0.22em] mb-5 border-b border-stone-200 pb-2">Morning Routine</h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <SimpleBarChart title="Morning Ritual Completion" data={trends.map(t => ({ label: t.label, value: t.mr }))} color="bg-gradient-to-r from-brand-orange to-brand-salmon" chartMax={100} />
                                         <SimpleBarChart title="Morning Ritual (Early)" data={trends.map(t => ({ label: t.label, value: t.mrEarly }))} color="bg-brand-yellow" chartMax={100} />
                                         <SimpleBarChart title="Avg MR Completed" data={trends.map(t => ({ label: t.label, value: t.mrCompletionAvgMin }))} color="bg-gradient-to-r from-brand-orange to-brand-salmon" chartMax={24 * 60} valueSuffix="" valueFormatter={(v) => minutesToTimeStr(v)} />
-                                        <SimpleBarChart title="Workday Start (Early)" data={trends.map(t => ({ label: t.label, value: t.workdayEarly }))} color="bg-gradient-to-r from-brand-mint to-brand-teal" chartMax={100} />
                                         <SimpleBarChart title="Avg MR Activities" data={trends.map(t => ({ label: t.label, value: t.mrAvg }))} color="bg-brand-orange" valueSuffix="" chartMax={14} />
+                                        <SimpleBarChart title="Workday Start (Early)" data={trends.map(t => ({ label: t.label, value: t.workdayEarly }))} color="bg-gradient-to-r from-brand-mint to-brand-teal" chartMax={100} />
                                         <SimpleBarChart title="Avg Workday Start" data={trends.map(t => ({ label: t.label, value: t.workdayAvgMin }))} color="bg-gradient-to-r from-brand-mint to-brand-teal" chartMax={24 * 60} valueSuffix="" valueFormatter={(v) => minutesToTimeStr(v)} />
                                     </div>
                                 </div>
@@ -1042,13 +1107,19 @@ function App() {
                         {trendsTab === 'night' && (
                             <div className="space-y-8">
                                 <div>
+                                    <h3 className="text-sm font-extrabold text-stone-400 uppercase tracking-[0.22em] mb-5 border-b border-stone-200 pb-2">Weekly Goals</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <SimpleBarChart title="Goals Achieved" data={trends.map(t => ({ label: t.label, value: t.nightGoals }))} color="bg-gradient-to-r from-brand-purple to-brand-blue" chartMax={100} />
+                                    </div>
+                                </div>
+                                <div>
                                     <h3 className="text-sm font-extrabold text-stone-400 uppercase tracking-[0.22em] mb-5 border-b border-stone-200 pb-2">Shutdown Routine</h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <SimpleBarChart title="Shutdown Ritual Completion" data={trends.map(t => ({ label: t.label, value: t.sdr }))} color="bg-gradient-to-r from-brand-periwinkle to-brand-purple" chartMax={100} />
                                         <SimpleBarChart title="Shutdown Ritual (Early)" data={trends.map(t => ({ label: t.label, value: t.sdrEarly }))} color="bg-brand-periwinkle" chartMax={100} />
                                         <SimpleBarChart title="Avg SDR Completed" data={trends.map(t => ({ label: t.label, value: t.sdrCompletionAvgMin }))} color="bg-gradient-to-r from-brand-periwinkle to-brand-purple" chartMax={24 * 60} valueSuffix="" valueFormatter={(v) => minutesToTimeStr(v)} />
-                                        <SimpleBarChart title="Workday End (Early)" data={trends.map(t => ({ label: t.label, value: t.workdayEndEarly }))} color="bg-gradient-to-r from-brand-blue to-brand-periwinkle" chartMax={100} />
                                         <SimpleBarChart title="Avg SDR Activities" data={trends.map(t => ({ label: t.label, value: t.sdrAvg }))} color="bg-brand-purple" valueSuffix="" chartMax={9} />
+                                        <SimpleBarChart title="Workday End (Early)" data={trends.map(t => ({ label: t.label, value: t.workdayEndEarly }))} color="bg-gradient-to-r from-brand-blue to-brand-periwinkle" chartMax={100} />
                                         <SimpleBarChart title="Avg Workday End" data={trends.map(t => ({ label: t.label, value: t.workdayEndAvgMin }))} color="bg-gradient-to-r from-brand-blue to-brand-periwinkle" chartMax={24 * 60} valueSuffix="" valueFormatter={(v) => minutesToTimeStr(v)} />
                                     </div>
                                 </div>
@@ -1066,31 +1137,40 @@ function App() {
                         )}
 
                         {trendsTab === 'sadhanas' && (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <SimpleBarChart
-                                    title="Morning Moment"
-                                    data={trends.map(t => ({ label: t.label, value: t.moment }))}
-                                    color="bg-gradient-to-r from-brand-yellow to-brand-orange"
-                                    chartMax={100}
-                                />
-                                <SimpleBarChart
-                                    title="Meditation"
-                                    data={trends.map(t => ({ label: t.label, value: t.meditation }))}
-                                    color="bg-gradient-to-r from-brand-salmon to-brand-pink"
-                                    chartMax={100}
-                                />
-                                <SimpleBarChart
-                                    title="Stretch / Walk"
-                                    data={trends.map(t => ({ label: t.label, value: t.stretch }))}
-                                    color="bg-gradient-to-r from-brand-mint to-brand-teal"
-                                    chartMax={100}
-                                />
-                                <SimpleBarChart
-                                    title="Rooting"
-                                    data={trends.map(t => ({ label: t.label, value: t.rooting }))}
-                                    color="bg-gradient-to-r from-brand-purple to-brand-periwinkle"
-                                    chartMax={100}
-                                />
+                            <div className="space-y-8">
+                                <div>
+                                    <h3 className="text-sm font-extrabold text-stone-400 uppercase tracking-[0.22em] mb-5 border-b border-stone-200 pb-2">Weekly Goals</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <SimpleBarChart title="Goals Achieved" data={trends.map(t => ({ label: t.label, value: t.sadhanasGoals }))} color="bg-gradient-to-r from-brand-periwinkle to-brand-purple" chartMax={100} />
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <SimpleBarChart
+                                        title="Morning Moment"
+                                        data={trends.map(t => ({ label: t.label, value: t.moment }))}
+                                        color="bg-gradient-to-r from-brand-yellow to-brand-orange"
+                                        chartMax={100}
+                                    />
+                                    <SimpleBarChart
+                                        title="Meditation"
+                                        data={trends.map(t => ({ label: t.label, value: t.meditation }))}
+                                        color="bg-gradient-to-r from-brand-salmon to-brand-pink"
+                                        chartMax={100}
+                                    />
+                                    <SimpleBarChart
+                                        title="Stretch / Walk"
+                                        data={trends.map(t => ({ label: t.label, value: t.stretch }))}
+                                        color="bg-gradient-to-r from-brand-mint to-brand-teal"
+                                        chartMax={100}
+                                    />
+                                    <SimpleBarChart
+                                        title="Rooting"
+                                        data={trends.map(t => ({ label: t.label, value: t.rooting }))}
+                                        color="bg-gradient-to-r from-brand-purple to-brand-periwinkle"
+                                        chartMax={100}
+                                    />
+                                </div>
                             </div>
                         )}
                     </div>
@@ -1646,6 +1726,15 @@ function App() {
         }
 
 export default App;
+
+
+
+
+
+
+
+
+
 
 
 
