@@ -221,9 +221,15 @@ function App() {
 
             const minutesToTimeStr = (mins) => {
                 if (!Number.isFinite(mins) || mins <= 0) return '--:--';
-                const h = Math.floor(mins / 60);
-                const m = mins % 60;
+                const normalized = ((Math.round(mins) % (24 * 60)) + (24 * 60)) % (24 * 60);
+                const h = Math.floor(normalized / 60);
+                const m = normalized % 60;
                 return `${h}:${String(m).padStart(2, '0')}`;
+            };
+
+            const toNightMinutes = (mins) => {
+                if (mins === null) return null;
+                return mins < (5 * 60) ? mins + (24 * 60) : mins;
             };
 
             const MORNING_ROUTINE_EARLY_CUTOFF = (9 * 60) + 50;
@@ -257,7 +263,7 @@ function App() {
             };
             const getWorkdayStartStatus = (log) => isWorkdayStartDone(log) ? (isWorkdayStartEarly(log) ? 'early' : 'late') : null;
 
-            const getShutdownRoutineMinutes = (log) => timeStrToMinutes(log?.sdr?.time);
+            const getShutdownRoutineMinutes = (log) => log?.sdr?.na ? null : toNightMinutes(timeStrToMinutes(log?.sdr?.time));
             const isShutdownRoutineDone = (log) => !log?.sdr?.na && (getShutdownRoutineMinutes(log) !== null || Boolean(log?.sdr?.done));
             const isShutdownRoutineEarly = (log) => {
                 const mins = getShutdownRoutineMinutes(log);
@@ -276,8 +282,8 @@ function App() {
                 return 'NO';
             };
 
-            const getWorkdayEndMinutes = (log) => timeStrToMinutes(log?.workdayEnd);
-            const isWorkdayEndDone = (log) => !log?.workdayEndNA && getWorkdayEndMinutes(log) !== null;
+            const getWorkdayEndMinutes = (log) => log?.workdayEndNA ? null : toNightMinutes(timeStrToMinutes(log?.workdayEnd));
+            const isWorkdayEndDone = (log) => getWorkdayEndMinutes(log) !== null;
             const isWorkdayEndEarly = (log) => {
                 const mins = getWorkdayEndMinutes(log);
                 return mins !== null ? mins < WORKDAY_END_EARLY_CUTOFF : false;
@@ -1085,10 +1091,10 @@ function App() {
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <SimpleBarChart title="Morning Ritual Completion" data={trends.map(t => ({ label: t.label, value: t.mr }))} color="bg-gradient-to-r from-brand-orange to-brand-salmon" chartMax={100} />
                                         <SimpleBarChart title="Morning Ritual (Early)" data={trends.map(t => ({ label: t.label, value: t.mrEarly }))} color="bg-brand-yellow" chartMax={100} />
-                                        <SimpleBarChart title="Avg MR Completed" data={trends.map(t => ({ label: t.label, value: t.mrCompletionAvgMin }))} color="bg-gradient-to-r from-brand-orange to-brand-salmon" chartMax={24 * 60} valueSuffix="" valueFormatter={(v) => minutesToTimeStr(v)} />
+                                        <SimpleBarChart title="Avg MR Completed" data={trends.map(t => ({ label: t.label, value: t.mrCompletionAvgMin }))} color="bg-gradient-to-r from-brand-orange to-brand-salmon" chartMin={6 * 60} chartMax={16 * 60} valueSuffix="" valueFormatter={(v) => minutesToTimeStr(v)} />
                                         <SimpleBarChart title="Avg MR Activities" data={trends.map(t => ({ label: t.label, value: t.mrAvg }))} color="bg-brand-orange" valueSuffix="" chartMax={14} />
                                         <SimpleBarChart title="Workday Start (Early)" data={trends.map(t => ({ label: t.label, value: t.workdayEarly }))} color="bg-gradient-to-r from-brand-mint to-brand-teal" chartMax={100} />
-                                        <SimpleBarChart title="Avg Workday Start" data={trends.map(t => ({ label: t.label, value: t.workdayAvgMin }))} color="bg-gradient-to-r from-brand-mint to-brand-teal" chartMax={24 * 60} valueSuffix="" valueFormatter={(v) => minutesToTimeStr(v)} />
+                                        <SimpleBarChart title="Avg Workday Start" data={trends.map(t => ({ label: t.label, value: t.workdayAvgMin }))} color="bg-gradient-to-r from-brand-mint to-brand-teal" chartMin={6 * 60} chartMax={16 * 60} valueSuffix="" valueFormatter={(v) => minutesToTimeStr(v)} />
                                     </div>
                                 </div>
 
@@ -1117,10 +1123,10 @@ function App() {
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <SimpleBarChart title="Shutdown Ritual Completion" data={trends.map(t => ({ label: t.label, value: t.sdr }))} color="bg-gradient-to-r from-brand-periwinkle to-brand-purple" chartMax={100} />
                                         <SimpleBarChart title="Shutdown Ritual (Early)" data={trends.map(t => ({ label: t.label, value: t.sdrEarly }))} color="bg-brand-periwinkle" chartMax={100} />
-                                        <SimpleBarChart title="Avg SDR Completed" data={trends.map(t => ({ label: t.label, value: t.sdrCompletionAvgMin }))} color="bg-gradient-to-r from-brand-periwinkle to-brand-purple" chartMax={24 * 60} valueSuffix="" valueFormatter={(v) => minutesToTimeStr(v)} />
+                                        <SimpleBarChart title="Avg SDR Completed" data={trends.map(t => ({ label: t.label, value: t.sdrCompletionAvgMin }))} color="bg-gradient-to-r from-brand-periwinkle to-brand-purple" chartMin={18 * 60} chartMax={28 * 60} valueSuffix="" valueFormatter={(v) => minutesToTimeStr(v)} />
                                         <SimpleBarChart title="Avg SDR Activities" data={trends.map(t => ({ label: t.label, value: t.sdrAvg }))} color="bg-brand-purple" valueSuffix="" chartMax={9} />
                                         <SimpleBarChart title="Workday End (Early)" data={trends.map(t => ({ label: t.label, value: t.workdayEndEarly }))} color="bg-gradient-to-r from-brand-blue to-brand-periwinkle" chartMax={100} />
-                                        <SimpleBarChart title="Avg Workday End" data={trends.map(t => ({ label: t.label, value: t.workdayEndAvgMin }))} color="bg-gradient-to-r from-brand-blue to-brand-periwinkle" chartMax={24 * 60} valueSuffix="" valueFormatter={(v) => minutesToTimeStr(v)} />
+                                        <SimpleBarChart title="Avg Workday End" data={trends.map(t => ({ label: t.label, value: t.workdayEndAvgMin }))} color="bg-gradient-to-r from-brand-blue to-brand-periwinkle" chartMin={18 * 60} chartMax={28 * 60} valueSuffix="" valueFormatter={(v) => minutesToTimeStr(v)} />
                                     </div>
                                 </div>
 
@@ -1726,6 +1732,10 @@ function App() {
         }
 
 export default App;
+
+
+
+
 
 
 
