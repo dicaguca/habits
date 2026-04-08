@@ -69,9 +69,12 @@ const Icons = {
             height = "h-48",
             valueSuffix = "%",
             chartMax = 100,
+            chartMin = 0,
             valueFormatter = (v) => `${v}${valueSuffix}`,
         }) => {
             const max = chartMax;
+            const min = chartMin;
+            const range = Math.max(max - min, 1);
 
             return (
                 <div className="bg-white p-6 rounded-3xl border border-stone-100 shadow-sm mb-6">
@@ -80,7 +83,7 @@ const Icons = {
                     <div className={`flex items-end gap-3 ${height} mb-4`}>
                         {data.map((d, i) => {
                             const safeValue = Number.isFinite(d.value) ? d.value : 0;
-                            const pct = max > 0 ? (safeValue / max) * 100 : 0;
+                            const pct = Math.max(0, Math.min(100, ((safeValue - min) / range) * 100));
 
                             return (
                                 <div key={i} className="flex-1 flex flex-col items-center justify-end h-full relative">
@@ -152,6 +155,8 @@ const Icons = {
         };
 
 export { Icons, ProgressBar, StackedBar, SimpleBarChart, Toggle, NumberInput, Modal };
+
+
 
 
 
