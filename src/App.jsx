@@ -1679,6 +1679,12 @@ function App() {
                                         <div className="text-sm text-stone-500">Early before 10:00 PM. Late at 10:00 PM or later.</div>
                                     </div>
                                 </div>
+
+                                <div className="bg-stone-50 border border-stone-200 rounded-2xl p-4">
+                                    <div className="text-xs font-bold uppercase tracking-widest text-stone-500 mb-1">Trends Chart Ranges</div>
+                                    <div className="text-sm text-stone-600">Morning charts use 6:00 AM to 4:00 PM.</div>
+                                    <div className="text-sm text-stone-600">Night charts use 6:00 PM to 4:00 AM.</div>
+                                </div>
                             </div>
                         </Modal>
                         {/* EXPORT MODAL */}
