@@ -201,7 +201,7 @@ const Icons = {
                     onChange={handleChange}
                     onBlur={handleBlur}
                     disabled={disabled}
-                    placeholder="HH:MM"
+                    placeholder="--:--"
                     maxLength="5"
                     className={className}
                 />
