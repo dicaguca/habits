@@ -1445,7 +1445,9 @@ function App() {
                                         </div>
                                         <div className="flex gap-2">
                                             <input
-                                                type="time"
+                                                type="text"
+                                                placeholder="HH:MM"
+                                                maxLength="5"
                                                 value={currentDaily.mr.time}
                                                 disabled={currentDaily.mr.na}
                                                 onChange={(e) => updateDaily({ mr: { ...currentDaily.mr, na: false, time: e.target.value } })}
@@ -1468,7 +1470,9 @@ function App() {
                                         </div>
                                         <div className="flex gap-2">
                                             <input
-                                                type="time"
+                                                type="text"
+                                                placeholder="HH:MM"
+                                                maxLength="5"
                                                 value={currentDaily.workday}
                                                 disabled={currentDaily.workdayStartNA}
                                                 onChange={(e) => updateDaily({ workdayStartNA: false, workday: e.target.value })}
@@ -1541,7 +1545,9 @@ function App() {
                                         </div>
                                         <div className="flex gap-2">
                                             <input
-                                                type="time"
+                                                type="text"
+                                                placeholder="HH:MM"
+                                                maxLength="5"
                                                 value={currentDaily.sdr.time}
                                                 disabled={currentDaily.sdr.na}
                                                 onChange={(e) => updateDaily({ sdr: { ...currentDaily.sdr, na: false, time: e.target.value } })}
@@ -1563,7 +1569,9 @@ function App() {
                                         </div>
                                         <div className="flex gap-2">
                                             <input
-                                                type="time"
+                                                type="text"
+                                                placeholder="HH:MM"
+                                                maxLength="5"
                                                 value={currentDaily.workdayEnd || ''}
                                                 disabled={currentDaily.workdayEndNA}
                                                 onChange={(e) => updateDaily({ workdayEndNA: false, workdayEnd: e.target.value })}
