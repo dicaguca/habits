@@ -85,7 +85,7 @@ function App() {
                     const result = await response.json().catch(() => ({}));
                     if (!response.ok) throw new Error(result.error || 'Cloud save failed');
 
-                    setSyncStatus(`Saved to Cloudflare ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}`);
+                    setSyncStatus(`Saved to Cloudflare ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`);
                     return true;
                 } catch (error) {
                     setSyncStatus(`Cloud save failed: ${error.message}`);
@@ -115,7 +115,7 @@ function App() {
                     setPbLogs(data.pbLogs || {});
                     setWeeklyGoals(data.weeklyGoals || {});
                     cloudLoadedRef.current = true;
-                    setSyncStatus(`Loaded from Cloudflare${data.updatedAt ? ` ${new Date(data.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}` : ''}`);
+                    setSyncStatus(`Loaded from Cloudflare${data.updatedAt ? ` ${new Date(data.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : ''}`);
                     return true;
                 } catch (error) {
                     cloudLoadedRef.current = false;
@@ -1658,32 +1658,32 @@ function App() {
                                     <div className="bg-brand-orange/10 border border-brand-orange/20 rounded-2xl p-4">
                                         <div className="text-xs font-bold uppercase tracking-widest text-brand-orange mb-1">Morning Routine</div>
                                         <div className="font-bold text-stone-800">MR Completed</div>
-                                        <div className="text-sm text-stone-500">Early before 09:50. Late at 09:50 or later.</div>
+                                        <div className="text-sm text-stone-500">Early before 9:50 AM. Late at 9:50 AM or later.</div>
                                     </div>
 
                                     <div className="bg-brand-mint/10 border border-brand-mint/20 rounded-2xl p-4">
                                         <div className="text-xs font-bold uppercase tracking-widest text-brand-mint mb-1">Morning Routine</div>
                                         <div className="font-bold text-stone-800">Workday Start</div>
-                                        <div className="text-sm text-stone-500">Early before 10:10. Late at 10:10 or later.</div>
+                                        <div className="text-sm text-stone-500">Early before 10:10 AM. Late at 10:10 AM or later.</div>
                                     </div>
 
                                     <div className="bg-brand-purple/10 border border-brand-purple/20 rounded-2xl p-4">
                                         <div className="text-xs font-bold uppercase tracking-widest text-brand-purple mb-1">Shutdown Routine</div>
                                         <div className="font-bold text-stone-800">SDR Completed</div>
-                                        <div className="text-sm text-stone-500">Early before 22:45. Late at 22:45 or later.</div>
+                                        <div className="text-sm text-stone-500">Early before 10:45 PM. Late at 10:45 PM or later.</div>
                                     </div>
 
                                     <div className="bg-brand-blue/10 border border-brand-blue/20 rounded-2xl p-4">
                                         <div className="text-xs font-bold uppercase tracking-widest text-brand-blue mb-1">Shutdown Routine</div>
                                         <div className="font-bold text-stone-800">Workday End</div>
-                                        <div className="text-sm text-stone-500">Early before 22:00. Late at 22:00 or later.</div>
+                                        <div className="text-sm text-stone-500">Early before 10:00 PM. Late at 10:00 PM or later.</div>
                                     </div>
                                 </div>
 
                                 <div className="bg-stone-50 border border-stone-200 rounded-2xl p-4">
                                     <div className="text-xs font-bold uppercase tracking-widest text-stone-500 mb-1">Trends Chart Ranges</div>
-                                    <div className="text-sm text-stone-600">Morning charts use 06:00 to 16:00.</div>
-                                    <div className="text-sm text-stone-600">Night charts use 18:00 to 04:00.</div>
+                                    <div className="text-sm text-stone-600">Morning charts use 6:00 AM to 4:00 PM.</div>
+                                    <div className="text-sm text-stone-600">Night charts use 6:00 PM to 4:00 AM.</div>
                                 </div>
                             </div>
                         </Modal>
