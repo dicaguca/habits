@@ -62,8 +62,3 @@ body {
         ::-webkit-scrollbar-thumb:hover {
             background: #94a3b8;
         }
-
-        /* Force 24h display on time inputs by hiding the AM/PM field */
-        input[type="time"]::-webkit-datetime-edit-ampm-field {
-            display: none;
-        }
