@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { INITIAL_DAILY, INITIAL_PB } from './constants';
-import { Icons, Modal, NumberInput, ProgressBar, SimpleBarChart, StackedBar, Toggle } from './components/ui';
+import { Icons, Modal, NumberInput, ProgressBar, SimpleBarChart, StackedBar, Toggle, TimeInput24 } from './components/ui';
 
 function App() {
             // Get today's date in local timezone
@@ -1444,12 +1444,10 @@ function App() {
                                             {statusBadge(getMorningRoutineStatus(currentDaily), { lateClass: 'bg-brand-orange/30 text-orange-800' })}
                                         </div>
                                         <div className="flex gap-2">
-                                            <input
-                                                type="time"
-                                                lang="en-GB"
+                                            <TimeInput24
                                                 value={currentDaily.mr.time}
                                                 disabled={currentDaily.mr.na}
-                                                onChange={(e) => updateDaily({ mr: { ...currentDaily.mr, na: false, time: e.target.value } })}
+                                                onChange={(val) => updateDaily({ mr: { ...currentDaily.mr, na: false, time: val } })}
                                                 className={`flex-1 p-3 rounded-xl border-2 font-bold text-lg outline-none focus:border-brand-orange ${currentDaily.mr.na ? 'bg-stone-100 text-stone-400' : 'bg-white text-stone-800'}`}
                                             />
                                             <button
@@ -1468,12 +1466,10 @@ function App() {
                                             {statusBadge(getWorkdayStartStatus(currentDaily), { earlyClass: 'bg-brand-yellow/30 text-stone-700', lateClass: 'bg-brand-orange/30 text-orange-800' })}
                                         </div>
                                         <div className="flex gap-2">
-                                            <input
-                                                type="time"
-                                                lang="en-GB"
+                                            <TimeInput24
                                                 value={currentDaily.workday}
                                                 disabled={currentDaily.workdayStartNA}
-                                                onChange={(e) => updateDaily({ workdayStartNA: false, workday: e.target.value })}
+                                                onChange={(val) => updateDaily({ workdayStartNA: false, workday: val })}
                                                 className={`flex-1 p-3 rounded-xl border-2 font-bold text-lg outline-none focus:border-brand-orange ${currentDaily.workdayStartNA ? 'bg-stone-100 text-stone-400' : 'bg-white text-stone-800'}`}
                                             />
                                             <button
@@ -1542,12 +1538,10 @@ function App() {
                                             {statusBadge(getShutdownRoutineStatus(currentDaily), { earlyLabel: '\u{1F989} Good Owl', earlyClass: 'bg-brand-periwinkle/30 text-stone-700', lateClass: 'bg-brand-blue/30 text-blue-800' })}
                                         </div>
                                         <div className="flex gap-2">
-                                            <input
-                                                type="time"
-                                                lang="en-GB"
+                                            <TimeInput24
                                                 value={currentDaily.sdr.time}
                                                 disabled={currentDaily.sdr.na}
-                                                onChange={(e) => updateDaily({ sdr: { ...currentDaily.sdr, na: false, time: e.target.value } })}
+                                                onChange={(val) => updateDaily({ sdr: { ...currentDaily.sdr, na: false, time: val } })}
                                                 className={`flex-1 p-3 rounded-xl border-2 font-bold text-lg outline-none focus:border-brand-purple ${currentDaily.sdr.na ? 'bg-stone-100 text-stone-400' : 'bg-white text-stone-800'}`}
                                             />
                                             <button
@@ -1565,12 +1559,10 @@ function App() {
                                             {statusBadge(getWorkdayEndStatus(currentDaily), { earlyLabel: '\u{1F989} Good Owl', earlyClass: 'bg-brand-periwinkle/30 text-stone-700', lateClass: 'bg-brand-blue/30 text-blue-800' })}
                                         </div>
                                         <div className="flex gap-2">
-                                            <input
-                                                type="time"
-                                                lang="en-GB"
+                                            <TimeInput24
                                                 value={currentDaily.workdayEnd || ''}
                                                 disabled={currentDaily.workdayEndNA}
-                                                onChange={(e) => updateDaily({ workdayEndNA: false, workdayEnd: e.target.value })}
+                                                onChange={(val) => updateDaily({ workdayEndNA: false, workdayEnd: val })}
                                                 className={`flex-1 p-3 rounded-xl border-2 font-bold text-lg outline-none focus:border-brand-purple ${currentDaily.workdayEndNA ? 'bg-stone-100 text-stone-400' : 'bg-white text-stone-800'}`}
                                             />
                                             <button

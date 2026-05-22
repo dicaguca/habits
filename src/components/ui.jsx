@@ -154,7 +154,59 @@ const Icons = {
             );
         };
 
-export { Icons, ProgressBar, StackedBar, SimpleBarChart, Toggle, NumberInput, Modal };
+        // Custom 24h time input — uses local display state so partial typing
+        // never touches app state. Only propagates valid HH:MM (00:00–23:59).
+        // On blur, reverts display to the last valid saved value.
+        const TimeInput24 = ({ value, onChange, disabled, className }) => {
+            const [display, setDisplay] = React.useState(value || '');
+
+            React.useEffect(() => {
+                setDisplay(value || '');
+            }, [value]);
+
+            const handleChange = (e) => {
+                let raw = e.target.value.replace(/[^\d:]/g, '');
+
+                // Auto-insert colon after 2 digits when user types a 3rd digit
+                if (/^\d{3,4}$/.test(raw)) {
+                    raw = raw.slice(0, 2) + ':' + raw.slice(2, 4);
+                }
+                if (raw.length > 5) raw = raw.slice(0, 5);
+
+                setDisplay(raw);
+
+                if (raw === '') {
+                    onChange('');
+                } else if (/^\d{2}:\d{2}$/.test(raw)) {
+                    const [h, m] = raw.split(':').map(Number);
+                    if (h >= 0 && h <= 23 && m >= 0 && m <= 59) {
+                        onChange(raw);
+                    }
+                }
+                // Partial / invalid input stays in local display only
+            };
+
+            const handleBlur = () => {
+                // Discard any incomplete input; revert to last valid saved value
+                setDisplay(value || '');
+            };
+
+            return (
+                <input
+                    type="text"
+                    inputMode="numeric"
+                    value={display}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    disabled={disabled}
+                    placeholder="HH:MM"
+                    maxLength="5"
+                    className={className}
+                />
+            );
+        };
+
+export { Icons, ProgressBar, StackedBar, SimpleBarChart, Toggle, NumberInput, Modal, TimeInput24 };
 
 
 
