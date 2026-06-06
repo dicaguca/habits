@@ -925,6 +925,12 @@ function App() {
                     return sum + (target > 0 ? Math.min(goal.actual, target) : 0);
                 }, 0);
                 const totalProgressPct = totalTarget > 0 ? Math.round((totalCompleted / totalTarget) * 100) : 0;
+                const tabTarget = activeGoals.reduce((sum, goal) => sum + (Number(weekGoals[goal.key]) || 0), 0);
+                const tabCompleted = activeGoals.reduce((sum, goal) => {
+                    const target = Number(weekGoals[goal.key]) || 0;
+                    return sum + (target > 0 ? Math.min(goal.actual, target) : 0);
+                }, 0);
+                const tabProgressPct = tabTarget > 0 ? Math.round((tabCompleted / tabTarget) * 100) : 0;
                 const goalsSet = activeGoals.filter(goal => (Number(weekGoals[goal.key]) || 0) > 0).length;
                 const goalsMet = activeGoals.filter(goal => {
                     const target = Number(weekGoals[goal.key]) || 0;
@@ -1002,7 +1008,7 @@ function App() {
                                 <button onClick={() => setShowGoals(false)} className="bg-stone-200 hover:bg-stone-300 p-2 rounded-full transition-colors text-stone-500 absolute top-4 right-4 md:static"><Icons.X /></button>
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                                 <div className="bg-white p-5 rounded-3xl shadow-sm border border-stone-100">
                                     <div className="text-xs font-bold uppercase tracking-widest text-stone-400">Goals Set</div>
                                     <div className="text-3xl font-extrabold text-stone-800 mt-2">{goalsSet}</div>
@@ -1010,6 +1016,10 @@ function App() {
                                 <div className="bg-white p-5 rounded-3xl shadow-sm border border-stone-100">
                                     <div className="text-xs font-bold uppercase tracking-widest text-stone-400">Goals Met</div>
                                     <div className="text-3xl font-extrabold text-brand-mint mt-2">{goalsMet}</div>
+                                </div>
+                                <div className="bg-white p-5 rounded-3xl shadow-sm border border-stone-100">
+                                    <div className="text-xs font-bold uppercase tracking-widest text-stone-400">Progress</div>
+                                    <div className="text-3xl font-extrabold text-stone-800 mt-2">{tabProgressPct}%</div>
                                 </div>
                                 <div className="bg-white p-5 rounded-3xl shadow-sm border border-stone-100">
                                     <div className="text-xs font-bold uppercase tracking-widest text-stone-400">Total Progress</div>
