@@ -957,7 +957,7 @@ function App() {
                     const isMet = target > 0 && goal.actual >= target;
 
                     return (
-                        <div className={`rounded-2xl border-2 p-4 transition-all ${isMet ? 'border-brand-mint bg-brand-mint/10' : 'border-stone-100 bg-white'}`}>
+                        <div className={`py-3 transition-all ${isMet ? 'bg-brand-mint/5 rounded-xl px-3 -mx-3' : ''}`}>
                             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                                 <div className="flex-1">
                                     <div className="flex items-center justify-between gap-3 mb-2">
@@ -1048,7 +1048,7 @@ function App() {
                                 </button>
                             </div>
 
-                            <div className="bg-white p-6 rounded-3xl shadow-sm border border-stone-100 space-y-4">
+                            <div className="bg-white px-6 py-2 rounded-3xl shadow-sm border border-stone-100 divide-y divide-stone-100">
                                 {activeGoals.map(goal => <GoalRow key={goal.key} goal={goal} />)}
                             </div>
                         </div>
