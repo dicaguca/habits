@@ -1000,7 +1000,7 @@ function App() {
                                             className="w-14 bg-transparent text-center font-extrabold text-stone-800 outline-none"
                                         />
                                     </label>
-                                    {vsLastWeek && <span className="text-[10px] text-stone-400">{vsLastWeek}</span>}
+                                    {vsLastWeek && <span className="text-xs text-stone-400">{vsLastWeek}</span>}
                                 </div>
                             </div>
                         </div>
@@ -1025,44 +1025,52 @@ function App() {
                                 <button onClick={() => setShowGoals(false)} className="bg-stone-200 hover:bg-stone-300 p-2 rounded-full transition-colors text-stone-500 absolute top-4 right-4 md:static"><Icons.X /></button>
                             </div>
 
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                                <div className="bg-white p-5 rounded-3xl shadow-sm border border-stone-100">
-                                    <div className="text-xs font-bold uppercase tracking-widest text-stone-400">Goals Set</div>
-                                    <div className="text-3xl font-extrabold text-stone-800 mt-2">{goalsSet}</div>
+                            <div className="flex items-center gap-2 mb-6">
+                                <div className="w-10 shrink-0" />
+                                <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-4">
+                                    <div className="bg-white p-5 rounded-3xl shadow-sm border border-stone-100">
+                                        <div className="text-xs font-bold uppercase tracking-widest text-stone-400">Goals Set</div>
+                                        <div className="text-3xl font-extrabold text-stone-800 mt-2">{goalsSet}</div>
+                                    </div>
+                                    <div className="bg-white p-5 rounded-3xl shadow-sm border border-stone-100">
+                                        <div className="text-xs font-bold uppercase tracking-widest text-stone-400">Goals Met</div>
+                                        <div className="text-3xl font-extrabold text-brand-mint mt-2">{goalsMet}</div>
+                                    </div>
+                                    <div className="bg-white p-5 rounded-3xl shadow-sm border border-stone-100">
+                                        <div className="text-xs font-bold uppercase tracking-widest text-stone-400">Progress</div>
+                                        <div className="text-3xl font-extrabold text-stone-800 mt-2">{tabProgressPct}%</div>
+                                    </div>
+                                    <div className="bg-white p-5 rounded-3xl shadow-sm border border-stone-100">
+                                        <div className="text-xs font-bold uppercase tracking-widest text-stone-400">Total Progress</div>
+                                        <div className="text-3xl font-extrabold text-stone-800 mt-2">{totalProgressPct}%</div>
+                                    </div>
                                 </div>
-                                <div className="bg-white p-5 rounded-3xl shadow-sm border border-stone-100">
-                                    <div className="text-xs font-bold uppercase tracking-widest text-stone-400">Goals Met</div>
-                                    <div className="text-3xl font-extrabold text-brand-mint mt-2">{goalsMet}</div>
-                                </div>
-                                <div className="bg-white p-5 rounded-3xl shadow-sm border border-stone-100">
-                                    <div className="text-xs font-bold uppercase tracking-widest text-stone-400">Progress</div>
-                                    <div className="text-3xl font-extrabold text-stone-800 mt-2">{tabProgressPct}%</div>
-                                </div>
-                                <div className="bg-white p-5 rounded-3xl shadow-sm border border-stone-100">
-                                    <div className="text-xs font-bold uppercase tracking-widest text-stone-400">Total Progress</div>
-                                    <div className="text-3xl font-extrabold text-stone-800 mt-2">{totalProgressPct}%</div>
-                                </div>
+                                <div className="w-10 shrink-0" />
                             </div>
 
-                            <div className="flex gap-4 mb-8">
-                                <button
-                                    onClick={() => setGoalsTab('morning')}
-                                    className={`flex-1 py-3 rounded-xl font-bold transition-all ${goalsTab === 'morning' ? 'bg-brand-orange text-white shadow-md' : 'bg-white text-stone-400 hover:bg-stone-50'}`}
-                                >
-                                    Morning
-                                </button>
-                                <button
-                                    onClick={() => setGoalsTab('night')}
-                                    className={`flex-1 py-3 rounded-xl font-bold transition-all ${goalsTab === 'night' ? 'bg-brand-purple text-white shadow-md' : 'bg-white text-stone-400 hover:bg-stone-50'}`}
-                                >
-                                    Night
-                                </button>
-                                <button
-                                    onClick={() => setGoalsTab('sadhanas')}
-                                    className={`flex-1 py-3 rounded-xl font-bold transition-all ${goalsTab === 'sadhanas' ? 'bg-brand-periwinkle text-white shadow-md' : 'bg-white text-stone-400 hover:bg-stone-50'}`}
-                                >
-                                    Sadhanas
-                                </button>
+                            <div className="flex items-center gap-2 mb-8">
+                                <div className="w-10 shrink-0" />
+                                <div className="flex-1 flex gap-4">
+                                    <button
+                                        onClick={() => setGoalsTab('morning')}
+                                        className={`flex-1 py-3 rounded-xl font-bold transition-all ${goalsTab === 'morning' ? 'bg-brand-orange text-white shadow-md' : 'bg-white text-stone-400 hover:bg-stone-50'}`}
+                                    >
+                                        Morning
+                                    </button>
+                                    <button
+                                        onClick={() => setGoalsTab('night')}
+                                        className={`flex-1 py-3 rounded-xl font-bold transition-all ${goalsTab === 'night' ? 'bg-brand-purple text-white shadow-md' : 'bg-white text-stone-400 hover:bg-stone-50'}`}
+                                    >
+                                        Night
+                                    </button>
+                                    <button
+                                        onClick={() => setGoalsTab('sadhanas')}
+                                        className={`flex-1 py-3 rounded-xl font-bold transition-all ${goalsTab === 'sadhanas' ? 'bg-brand-periwinkle text-white shadow-md' : 'bg-white text-stone-400 hover:bg-stone-50'}`}
+                                    >
+                                        Sadhanas
+                                    </button>
+                                </div>
+                                <div className="w-10 shrink-0" />
                             </div>
 
                             <div className="flex items-center gap-2">
