@@ -889,6 +889,9 @@ function App() {
                     setCurrentWeekStart(newStart);
                 };
 
+                const currentWeekKey = getLocalDateString(getSundayDate(getLocalDateString()));
+                const isCurrentWeek = weekKey >= currentWeekKey;
+
                 const countDaily = (checkFn) => weekDates.filter(date => checkFn(dailyLogs[date] || INITIAL_DAILY)).length;
                 const countPb = (checkFn) => weekDates.filter(date => checkFn(pbLogs[date] || INITIAL_PB)).length;
 
@@ -969,7 +972,7 @@ function App() {
                                     <div className="h-3 bg-stone-100 rounded-full overflow-hidden shadow-inner">
                                         <div className={`h-full bg-gradient-to-r ${goal.color} rounded-full transition-all duration-500`} style={{ width: `${progress}%` }}></div>
                                     </div>
-                                    <div className="text-xs font-bold text-stone-400 uppercase tracking-wider mt-2">
+                                    <div className="text-[10px] text-stone-400 uppercase tracking-wide mt-1">
                                         {target > 0 ? (isMet ? 'Goal met' : `${Math.max(target - goal.actual, 0)} more to go`) : 'No goal set'}
                                     </div>
                                 </div>
@@ -1048,8 +1051,12 @@ function App() {
                                 </button>
                             </div>
 
-                            <div className="bg-white px-6 py-2 rounded-3xl shadow-sm border border-stone-100 divide-y divide-stone-100">
-                                {activeGoals.map(goal => <GoalRow key={goal.key} goal={goal} />)}
+                            <div className="flex items-center gap-2">
+                                <button onClick={() => shiftWeek(-1)} className="p-2 rounded-full hover:bg-white transition-all text-stone-400 hover:text-stone-600 shrink-0"><Icons.ChevronLeft /></button>
+                                <div className="flex-1 bg-white px-6 py-2 rounded-3xl shadow-sm border border-stone-100 divide-y divide-stone-100">
+                                    {activeGoals.map(goal => <GoalRow key={goal.key} goal={goal} />)}
+                                </div>
+                                <button onClick={() => !isCurrentWeek && shiftWeek(1)} className={`p-2 rounded-full transition-all shrink-0 ${isCurrentWeek ? 'text-stone-200 cursor-default' : 'text-stone-400 hover:bg-white hover:text-stone-600'}`}><Icons.ChevronRight /></button>
                             </div>
                         </div>
                     </div>
