@@ -892,6 +892,11 @@ function App() {
                 const currentWeekKey = getLocalDateString(getSundayDate(getLocalDateString()));
                 const isCurrentWeek = weekKey >= currentWeekKey;
 
+                const prevWeekStart = new Date(currentWeekStart);
+                prevWeekStart.setDate(prevWeekStart.getDate() - 7);
+                const prevWeekKey = getLocalDateString(prevWeekStart);
+                const prevWeekGoals = weeklyGoals[prevWeekKey] || {};
+
                 const countDaily = (checkFn) => weekDates.filter(date => checkFn(dailyLogs[date] || INITIAL_DAILY)).length;
                 const countPb = (checkFn) => weekDates.filter(date => checkFn(pbLogs[date] || INITIAL_PB)).length;
 
@@ -956,12 +961,18 @@ function App() {
 
                 const GoalRow = ({ goal }) => {
                     const target = Number(weekGoals[goal.key]) || 0;
+                    const prevTarget = Number(prevWeekGoals[goal.key]) || 0;
+                    const diff = target - prevTarget;
                     const progress = target > 0 ? Math.min(100, Math.round((goal.actual / target) * 100)) : 0;
                     const isMet = target > 0 && goal.actual >= target;
 
+                    const vsLastWeek = target > 0 && prevTarget > 0
+                        ? diff === 0 ? 'same as last week' : `${diff > 0 ? '+' : ''}${diff} vs last week`
+                        : null;
+
                     return (
                         <div className={`py-3 transition-all ${isMet ? 'bg-brand-mint/5 rounded-xl px-3 -mx-3' : ''}`}>
-                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                            <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
                                 <div className="flex-1">
                                     <div className="flex items-center justify-between gap-3 mb-2">
                                         <h3 className="font-bold text-stone-800">{goal.label}</h3>
@@ -977,17 +988,20 @@ function App() {
                                     </div>
                                 </div>
 
-                                <label className="flex items-center gap-2 bg-stone-50 border border-stone-200 rounded-xl px-3 py-2">
-                                    <span className="text-xs font-bold text-stone-400 uppercase">Goal</span>
-                                    <input
-                                        type="number"
-                                        min="0"
-                                        max="7"
-                                        value={target}
-                                        onChange={(e) => updateGoal(goal.key, e.target.value)}
-                                        className="w-14 bg-transparent text-center font-extrabold text-stone-800 outline-none"
-                                    />
-                                </label>
+                                <div className="flex flex-col items-center gap-1">
+                                    <label className="flex items-center gap-2 bg-stone-50 border border-stone-200 rounded-xl px-3 py-2">
+                                        <span className="text-xs font-bold text-stone-400 uppercase">Goal</span>
+                                        <input
+                                            type="number"
+                                            min="0"
+                                            max="7"
+                                            value={target}
+                                            onChange={(e) => updateGoal(goal.key, e.target.value)}
+                                            className="w-14 bg-transparent text-center font-extrabold text-stone-800 outline-none"
+                                        />
+                                    </label>
+                                    {vsLastWeek && <span className="text-[10px] text-stone-400">{vsLastWeek}</span>}
+                                </div>
                             </div>
                         </div>
                     );
