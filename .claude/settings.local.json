@@ -2,7 +2,14 @@
   "permissions": {
     "allow": [
       "Bash(Get-ChildItem -Recurse -Depth 3)",
-      "Bash(Select-Object FullName)"
+      "Bash(Select-Object FullName)",
+      "Bash(ls -la \"d:\\\\\\\\D apps\\\\\\\\habits\")",
+      "Bash(find \"d:\\\\\\\\D apps\\\\\\\\habits\\\\\\\\src\" -type f)",
+      "Bash(git -C \"d:/D apps/habits\" status)",
+      "Bash(git -C \"d:/D apps/habits\" diff)",
+      "Bash(git -C \"d:/D apps/habits\" add src/App.jsx)",
+      "Bash(git -C 'd:/D apps/habits' commit -m ' *)",
+      "Bash(git -C \"d:/D apps/habits\" push)"
     ]
   }
 }

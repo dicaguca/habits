@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { INITIAL_DAILY, INITIAL_PB } from './constants';
+import { INITIAL_DAILY, INITIAL_PB, MR_MAX_ACTIVITIES, MR_MAX_ACTIVITIES_OLD, MR_MAX_CHANGE_DATE, SDR_MAX_ACTIVITIES } from './constants';
 import { Icons, Modal, NumberInput, ProgressBar, SimpleBarChart, StackedBar, Toggle, TimeInput24 } from './components/ui';
 
 function App() {
@@ -365,7 +365,7 @@ function App() {
                     let mrCount = 0, mrEarlyCount = 0, sdrCount = 0, sdrEarlyCount = 0;
                     let workdayStartCount = 0, workdayStartEarlyCount = 0, workdayEndCount = 0, workdayEndEarlyCount = 0;
                     let mrCompletionTimes = [], sdrCompletionTimes = [];
-                    let mrTotalActs = 0, sdrTotalActs = 0;
+                    let mrTotalPcts = 0, sdrTotalPcts = 0;
 
                     let lightsCount = 0, tvCount = 0, lsibCount = 0, bedCount = 0;
                     let brushTeethCount = 0, faceCareCount = 0, pregabalinVitaminsCount = 0, makeBedCleanRoomCount = 0;
@@ -377,14 +377,14 @@ function App() {
                             if (isMorningRoutineEarly(log)) mrEarlyCount++;
                             const mrMinutes = getMorningRoutineMinutes(log);
                             if (mrMinutes !== null) mrCompletionTimes.push(mrMinutes);
-                            mrTotalActs += (log.mr.count || 0);
+                            mrTotalPcts += Math.min(100, Math.round((log.mr.count || 0) / (log.mr.maxCount || MR_MAX_ACTIVITIES_OLD) * 100));
                         }
                         if (isShutdownRoutineDone(log)) {
                             sdrCount++;
                             if (isShutdownRoutineEarly(log)) sdrEarlyCount++;
                             const sdrMinutes = getShutdownRoutineMinutes(log);
                             if (sdrMinutes !== null) sdrCompletionTimes.push(sdrMinutes);
-                            sdrTotalActs += (log.sdr.count || 0);
+                            sdrTotalPcts += Math.min(100, Math.round((log.sdr.count || 0) / (log.sdr.maxCount || 9) * 100));
                         }
                         if (isWorkdayStartDone(log)) {
                             workdayStartCount++;
@@ -454,10 +454,10 @@ function App() {
                         sdrCompletionAvgMin,
                         mr: Math.round((mrCount / totalDailyDays) * 100),
                         mrEarly: Math.round((mrEarlyCount / totalDailyDays) * 100),
-                        mrAvg: Math.round(mrTotalActs / totalDailyDays),
+                        mrAvg: Math.round(mrTotalPcts / totalDailyDays),
                         sdr: Math.round((sdrCount / totalDailyDays) * 100),
                         sdrEarly: Math.round((sdrEarlyCount / totalDailyDays) * 100),
-                        sdrAvg: Math.round(sdrTotalActs / totalDailyDays),
+                        sdrAvg: Math.round(sdrTotalPcts / totalDailyDays),
                         lights: Math.round((lightsCount / totalDailyDays) * 100),
                         tv: Math.round((tvCount / totalDailyDays) * 100),
                         lsib: Math.round((lsibCount / totalDailyDays) * 100),
@@ -1131,7 +1131,7 @@ function App() {
                                         <SimpleBarChart title="Morning Ritual Completion" data={trends.map(t => ({ label: t.label, value: t.mr }))} color="bg-gradient-to-r from-brand-orange to-brand-salmon" chartMax={100} />
                                         <SimpleBarChart title="Morning Ritual (Early)" data={trends.map(t => ({ label: t.label, value: t.mrEarly }))} color="bg-brand-yellow" chartMax={100} />
                                         <SimpleBarChart title="Avg MR Completed" data={trends.map(t => ({ label: t.label, value: t.mrCompletionAvgMin }))} color="bg-gradient-to-r from-brand-orange to-brand-salmon" chartMin={6 * 60} chartMax={16 * 60} valueSuffix="" valueFormatter={(v) => minutesToTimeStr(v)} />
-                                        <SimpleBarChart title="Avg MR Activities" data={trends.map(t => ({ label: t.label, value: t.mrAvg }))} color="bg-brand-orange" valueSuffix="" chartMax={14} />
+                                        <SimpleBarChart title="Avg MR Activities" data={trends.map(t => ({ label: t.label, value: t.mrAvg }))} color="bg-brand-orange" valueSuffix="%" chartMax={100} />
                                         <SimpleBarChart title="Workday Start (Early)" data={trends.map(t => ({ label: t.label, value: t.workdayEarly }))} color="bg-gradient-to-r from-brand-mint to-brand-teal" chartMax={100} />
                                         <SimpleBarChart title="Avg Workday Start" data={trends.map(t => ({ label: t.label, value: t.workdayAvgMin }))} color="bg-gradient-to-r from-brand-mint to-brand-teal" chartMin={6 * 60} chartMax={16 * 60} valueSuffix="" valueFormatter={(v) => minutesToTimeStr(v)} />
                                     </div>
@@ -1163,7 +1163,7 @@ function App() {
                                         <SimpleBarChart title="Shutdown Ritual Completion" data={trends.map(t => ({ label: t.label, value: t.sdr }))} color="bg-gradient-to-r from-brand-periwinkle to-brand-purple" chartMax={100} />
                                         <SimpleBarChart title="Shutdown Ritual (Early)" data={trends.map(t => ({ label: t.label, value: t.sdrEarly }))} color="bg-brand-periwinkle" chartMax={100} />
                                         <SimpleBarChart title="Avg SDR Completed" data={trends.map(t => ({ label: t.label, value: t.sdrCompletionAvgMin }))} color="bg-gradient-to-r from-brand-periwinkle to-brand-purple" chartMin={18 * 60} chartMax={28 * 60} valueSuffix="" valueFormatter={(v) => minutesToTimeStr(v)} />
-                                        <SimpleBarChart title="Avg SDR Activities" data={trends.map(t => ({ label: t.label, value: t.sdrAvg }))} color="bg-brand-purple" valueSuffix="" chartMax={9} />
+                                        <SimpleBarChart title="Avg SDR Activities" data={trends.map(t => ({ label: t.label, value: t.sdrAvg }))} color="bg-brand-purple" valueSuffix="%" chartMax={100} />
                                         <SimpleBarChart title="Workday End (Early)" data={trends.map(t => ({ label: t.label, value: t.workdayEndEarly }))} color="bg-gradient-to-r from-brand-blue to-brand-periwinkle" chartMax={100} />
                                         <SimpleBarChart title="Avg Workday End" data={trends.map(t => ({ label: t.label, value: t.workdayEndAvgMin }))} color="bg-gradient-to-r from-brand-blue to-brand-periwinkle" chartMin={18 * 60} chartMax={28 * 60} valueSuffix="" valueFormatter={(v) => minutesToTimeStr(v)} />
                                     </div>
@@ -1473,8 +1473,8 @@ function App() {
                                         <NumberInput
                                             label="Activities Count"
                                             value={currentDaily.mr.count}
-                                            max={14}
-                                            onChange={(val) => updateDaily({ mr: { ...currentDaily.mr, count: val } })}
+                                            max={selectedDate >= MR_MAX_CHANGE_DATE ? MR_MAX_ACTIVITIES : MR_MAX_ACTIVITIES_OLD}
+                                            onChange={(val) => updateDaily({ mr: { ...currentDaily.mr, count: val, maxCount: selectedDate >= MR_MAX_CHANGE_DATE ? MR_MAX_ACTIVITIES : MR_MAX_ACTIVITIES_OLD } })}
                                         />
                                     </div>
                                     <div className="space-y-3 mb-6">
@@ -1566,8 +1566,8 @@ function App() {
                                         <NumberInput
                                             label="Activities Count"
                                             value={currentDaily.sdr.count}
-                                            max={9}
-                                            onChange={(val) => updateDaily({ sdr: { ...currentDaily.sdr, count: val } })}
+                                            max={SDR_MAX_ACTIVITIES}
+                                            onChange={(val) => updateDaily({ sdr: { ...currentDaily.sdr, count: val, maxCount: SDR_MAX_ACTIVITIES } })}
                                         />
                                     </div>
 

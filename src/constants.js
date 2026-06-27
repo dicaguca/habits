@@ -21,7 +21,12 @@ const INITIAL_DAILY = {
             rooting: false
         };
 
-export { INITIAL_DAILY, INITIAL_PB };
+const MR_MAX_ACTIVITIES_OLD = 14;   // max before the cutoff date
+const MR_MAX_ACTIVITIES = 13;       // max from the cutoff date onwards
+const MR_MAX_CHANGE_DATE = '2026-06-27'; // first day the new max applies
+const SDR_MAX_ACTIVITIES = 9;
+
+export { INITIAL_DAILY, INITIAL_PB, MR_MAX_ACTIVITIES, MR_MAX_ACTIVITIES_OLD, MR_MAX_CHANGE_DATE, SDR_MAX_ACTIVITIES };
 
 
 

@@ -48,3 +48,26 @@ npm run build
 ```
 
 Output goes to the `dist/` folder.
+
+---
+
+## Changing MR / SDR activity max counts
+
+The number of activities in the Morning Routine (MR) and Shutdown Routine (SDR) checklists is tracked in [`src/constants.js`](src/constants.js). Trends display completion as a **percentage** so that changing the max doesn't distort historical data.
+
+### Current values
+
+| Routine | Max activities | In effect from |
+|---------|---------------|----------------|
+| MR | 13 | 2026-06-27 |
+| MR (old) | 14 | before 2026-06-27 |
+| SDR | 9 | always |
+
+### How to change the MR max again in the future
+
+1. Open `src/constants.js`.
+2. Update `MR_MAX_ACTIVITIES_OLD` to the value being retired (e.g. `13`).
+3. Update `MR_MAX_ACTIVITIES` to the new value (e.g. `12`).
+4. Update `MR_MAX_CHANGE_DATE` to today's date in `'YYYY-MM-DD'` format.
+
+The app uses `MR_MAX_CHANGE_DATE` to decide the spinner limit when entering activities: days **before** the cutoff keep the old max, days **on or after** use the new max. Each saved entry stores its own `maxCount` so historical trend percentages are never recalculated retroactively.
