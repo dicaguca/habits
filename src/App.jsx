@@ -234,8 +234,19 @@ function App() {
 
             const MORNING_ROUTINE_EARLY_CUTOFF = (9 * 60) + 50;
             const WORKDAY_START_EARLY_CUTOFF = (10 * 60) + 10;
-            const SHUTDOWN_ROUTINE_EARLY_CUTOFF = (22 * 60) + 45;
-            const WORKDAY_END_EARLY_CUTOFF = 22 * 60;
+
+            // Night cutoffs changed on this date. Entries before it keep the old cutoffs
+            // so past Early/Late labels aren't recalculated retroactively.
+            const NIGHT_CUTOFF_CHANGE_DATE = '2026-08-09';
+            const SHUTDOWN_ROUTINE_EARLY_CUTOFF_OLD = (22 * 60) + 45;
+            const SHUTDOWN_ROUTINE_EARLY_CUTOFF_NEW = 23 * 60;
+            const WORKDAY_END_EARLY_CUTOFF_OLD = 22 * 60;
+            const WORKDAY_END_EARLY_CUTOFF_NEW = (22 * 60) + 45;
+
+            const getShutdownRoutineEarlyCutoff = (dateKey) =>
+                (dateKey && dateKey < NIGHT_CUTOFF_CHANGE_DATE) ? SHUTDOWN_ROUTINE_EARLY_CUTOFF_OLD : SHUTDOWN_ROUTINE_EARLY_CUTOFF_NEW;
+            const getWorkdayEndEarlyCutoff = (dateKey) =>
+                (dateKey && dateKey < NIGHT_CUTOFF_CHANGE_DATE) ? WORKDAY_END_EARLY_CUTOFF_OLD : WORKDAY_END_EARLY_CUTOFF_NEW;
 
             const getMorningRoutineMinutes = (log) => log?.mr?.na ? null : timeStrToMinutes(log?.mr?.time);
             const isMorningRoutineDone = (log) => !log?.mr?.na && (getMorningRoutineMinutes(log) !== null || Boolean(log?.mr?.done));
@@ -265,16 +276,16 @@ function App() {
 
             const getShutdownRoutineMinutes = (log) => log?.sdr?.na ? null : toNightMinutes(timeStrToMinutes(log?.sdr?.time));
             const isShutdownRoutineDone = (log) => !log?.sdr?.na && (getShutdownRoutineMinutes(log) !== null || Boolean(log?.sdr?.done));
-            const isShutdownRoutineEarly = (log) => {
+            const isShutdownRoutineEarly = (log, dateKey) => {
                 const mins = getShutdownRoutineMinutes(log);
-                if (mins !== null) return mins < SHUTDOWN_ROUTINE_EARLY_CUTOFF;
+                if (mins !== null) return mins < getShutdownRoutineEarlyCutoff(dateKey);
                 return Boolean(log?.sdr?.early);
             };
-            const getShutdownRoutineStatus = (log) => isShutdownRoutineDone(log) ? (isShutdownRoutineEarly(log) ? 'early' : 'late') : null;
-            const getShutdownRoutineDisplay = (log) => {
+            const getShutdownRoutineStatus = (log, dateKey) => isShutdownRoutineDone(log) ? (isShutdownRoutineEarly(log, dateKey) ? 'early' : 'late') : null;
+            const getShutdownRoutineDisplay = (log, dateKey) => {
                 if (log?.sdr?.na) return 'N/A';
                 if (getShutdownRoutineMinutes(log) !== null) {
-                    return isShutdownRoutineEarly(log) ? 'EARLY ' + log.sdr.time : 'LATE ' + log.sdr.time;
+                    return isShutdownRoutineEarly(log, dateKey) ? 'EARLY ' + log.sdr.time : 'LATE ' + log.sdr.time;
                 }
                 if (log?.sdr?.done) {
                     return log?.sdr?.early ? 'EARLY' : 'DONE';
@@ -284,11 +295,11 @@ function App() {
 
             const getWorkdayEndMinutes = (log) => log?.workdayEndNA ? null : toNightMinutes(timeStrToMinutes(log?.workdayEnd));
             const isWorkdayEndDone = (log) => getWorkdayEndMinutes(log) !== null;
-            const isWorkdayEndEarly = (log) => {
+            const isWorkdayEndEarly = (log, dateKey) => {
                 const mins = getWorkdayEndMinutes(log);
-                return mins !== null ? mins < WORKDAY_END_EARLY_CUTOFF : false;
+                return mins !== null ? mins < getWorkdayEndEarlyCutoff(dateKey) : false;
             };
-            const getWorkdayEndStatus = (log) => isWorkdayEndDone(log) ? (isWorkdayEndEarly(log) ? 'early' : 'late') : null;
+            const getWorkdayEndStatus = (log, dateKey) => isWorkdayEndDone(log) ? (isWorkdayEndEarly(log, dateKey) ? 'early' : 'late') : null;
 
             const statusBadge = (status, { earlyLabel = '\u{1F426} Early Bird', lateLabel = 'Late', earlyClass = 'bg-brand-yellow/30 text-stone-700', lateClass = 'bg-brand-orange/30 text-stone-700' } = {}) => {
                 if (!status) return null;
@@ -310,7 +321,7 @@ function App() {
             const getWeeklyGoalAchievement = (tab, weekKey) => {
                 const goals = weeklyGoals[weekKey] || {};
                 const weekDates = getWeekDatesFromKey(weekKey);
-                const countDaily = (checkFn) => weekDates.filter(date => checkFn(dailyLogs[date] || INITIAL_DAILY)).length;
+                const countDaily = (checkFn) => weekDates.filter(date => checkFn(dailyLogs[date] || INITIAL_DAILY, date)).length;
                 const countPb = (checkFn) => weekDates.filter(date => checkFn(pbLogs[date] || INITIAL_PB)).length;
 
                 const goalSections = {
@@ -323,8 +334,8 @@ function App() {
                         { key: 'makeBedCleanRoom', actual: countDaily(log => log.morningHabits?.makeBedCleanRoom) },
                     ],
                     night: [
-                        { key: 'sdrEarly', actual: countDaily(log => getShutdownRoutineStatus(log) === 'early') },
-                        { key: 'workdayEndEarly', actual: countDaily(log => getWorkdayEndStatus(log) === 'early') },
+                        { key: 'sdrEarly', actual: countDaily((log, date) => getShutdownRoutineStatus(log, date) === 'early') },
+                        { key: 'workdayEndEarly', actual: countDaily((log, date) => getWorkdayEndStatus(log, date) === 'early') },
                         { key: 'sleepLights', actual: countDaily(log => log.sleep?.lights) },
                         { key: 'noTv', actual: countDaily(log => log.sleep?.tv) },
                         { key: 'noLateSnacks', actual: countDaily(log => log.sleep?.noLSIB) },
@@ -381,7 +392,7 @@ function App() {
                         }
                         if (isShutdownRoutineDone(log)) {
                             sdrCount++;
-                            if (isShutdownRoutineEarly(log)) sdrEarlyCount++;
+                            if (isShutdownRoutineEarly(log, d)) sdrEarlyCount++;
                             const sdrMinutes = getShutdownRoutineMinutes(log);
                             if (sdrMinutes !== null) sdrCompletionTimes.push(sdrMinutes);
                             sdrTotalPcts += Math.min(100, Math.round((log.sdr.count || 0) / (log.sdr.maxCount || 9) * 100));
@@ -392,7 +403,7 @@ function App() {
                         }
                         if (isWorkdayEndDone(log)) {
                             workdayEndCount++;
-                            if (isWorkdayEndEarly(log)) workdayEndEarlyCount++;
+                            if (isWorkdayEndEarly(log, d)) workdayEndEarlyCount++;
                         }
                         if (log?.sleep?.lights) lightsCount++;
                         if (log?.sleep?.tv) tvCount++;
@@ -517,10 +528,10 @@ function App() {
                 const mrLate = dailyDates.filter(d => getMorningRoutineStatus(dailyLogs[d]) === 'late').length;
                 const workdayStartEarly = dailyDates.filter(d => getWorkdayStartStatus(dailyLogs[d]) === 'early').length;
                 const workdayStartLate = dailyDates.filter(d => getWorkdayStartStatus(dailyLogs[d]) === 'late').length;
-                const sdrEarly = dailyDates.filter(d => getShutdownRoutineStatus(dailyLogs[d]) === 'early').length;
-                const sdrLate = dailyDates.filter(d => getShutdownRoutineStatus(dailyLogs[d]) === 'late').length;
-                const workdayEndEarly = dailyDates.filter(d => getWorkdayEndStatus(dailyLogs[d]) === 'early').length;
-                const workdayEndLate = dailyDates.filter(d => getWorkdayEndStatus(dailyLogs[d]) === 'late').length;
+                const sdrEarly = dailyDates.filter(d => getShutdownRoutineStatus(dailyLogs[d], d) === 'early').length;
+                const sdrLate = dailyDates.filter(d => getShutdownRoutineStatus(dailyLogs[d], d) === 'late').length;
+                const workdayEndEarly = dailyDates.filter(d => getWorkdayEndStatus(dailyLogs[d], d) === 'early').length;
+                const workdayEndLate = dailyDates.filter(d => getWorkdayEndStatus(dailyLogs[d], d) === 'late').length;
 
                 let lights = 0, tv = 0, lsib = 0, bed = 0;
                 let morningHabits = { brushTeeth: 0, faceCare: 0, pregabalinVitamins: 0, makeBedCleanRoom: 0 };
@@ -570,7 +581,7 @@ function App() {
                     dates.forEach(date => {
                         const l = dailyLogs[date];
                         const dateStr = new Date(date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-                        md += `| ${dateStr} | ${(l.workdayStartNA ?? l.isWeekend) ? 'N/A' : (l.workday || '')} | ${getMorningRoutineDisplay(l)} | ${l.mr.count > 0 ? l.mr.count + '/14' : ''} | ${getShutdownRoutineDisplay(l)} | ${l.sdr.count > 0 ? l.sdr.count + '/9' : ''} | ${l.sleep.lights ? 'YES' : 'NO'} | ${l.sleep.tv ? 'YES' : 'NO'} | ${l.sleep.noLSIB ? 'YES' : 'NO'} | ${l.sleep.bedtime ? 'YES' : 'NO'} |\n`;
+                        md += `| ${dateStr} | ${(l.workdayStartNA ?? l.isWeekend) ? 'N/A' : (l.workday || '')} | ${getMorningRoutineDisplay(l)} | ${l.mr.count > 0 ? l.mr.count + '/14' : ''} | ${getShutdownRoutineDisplay(l, date)} | ${l.sdr.count > 0 ? l.sdr.count + '/9' : ''} | ${l.sleep.lights ? 'YES' : 'NO'} | ${l.sleep.tv ? 'YES' : 'NO'} | ${l.sleep.noLSIB ? 'YES' : 'NO'} | ${l.sleep.bedtime ? 'YES' : 'NO'} |\n`;
                     });
                     return md;
                 } else {
@@ -701,7 +712,7 @@ function App() {
                         <div className="flex gap-1 md:gap-3 flex-1 justify-between max-w-md">
                             {dates.map((date) => {
                                 const log = logs[date] || (weeklyTab === 'sadhanas' ? INITIAL_PB : INITIAL_DAILY);
-                                const status = checkFn(log);
+                                const status = checkFn(log, date);
 
                                 let boxClass = emptyClass;
                                 let content = null;
@@ -830,14 +841,14 @@ function App() {
                                 {weeklyTab === 'night' && (
                                     <div className="space-y-1 pt-3">
                                         <div className="text-xs font-bold text-stone-400 uppercase tracking-[0.2em] pt-2 pb-1">Shutdown Routine</div>
-                                        <WeeklyRow label="SDR Completed" dates={weekDates} logs={dailyLogs} isRitual={true} dataKey="sdr" checkFn={l => getShutdownRoutineStatus(l)} colorClass="brand-purple" />
-                                        <WeeklyRow label="Workday End" dates={weekDates} logs={dailyLogs} isRitual={true} checkFn={l => getWorkdayEndStatus(l)} colorClass="brand-blue" />
+                                        <WeeklyRow label="SDR Completed" dates={weekDates} logs={dailyLogs} isRitual={true} dataKey="sdr" checkFn={(l, date) => getShutdownRoutineStatus(l, date)} colorClass="brand-purple" />
+                                        <WeeklyRow label="Workday End" dates={weekDates} logs={dailyLogs} isRitual={true} checkFn={(l, date) => getWorkdayEndStatus(l, date)} colorClass="brand-blue" />
                                         <div className="border-t border-dashed border-stone-200 my-2"></div>
                                         <div className="text-xs font-bold text-stone-400 uppercase tracking-[0.2em] pt-2 pb-1">Habits</div>
-                                        <WeeklyRow label="Sleep Lights Off" dates={weekDates} logs={dailyLogs} checkFn={l => l.sleep?.lights} colorClass="brand-yellow" />
+                                        <WeeklyRow label="Sleep Lights Off" dates={weekDates} logs={dailyLogs} checkFn={l => l.sleep?.lights} colorClass="brand-periwinkle" />
                                         <WeeklyRow label="No TV / Sound" dates={weekDates} logs={dailyLogs} checkFn={l => l.sleep?.tv} colorClass="brand-blue" />
-                                        <WeeklyRow label="No Late Snacks" dates={weekDates} logs={dailyLogs} checkFn={l => l.sleep?.noLSIB} colorClass="brand-mint" />
-                                        <WeeklyRow label="Bedtime < 12" dates={weekDates} logs={dailyLogs} checkFn={l => l.sleep?.bedtime} colorClass="brand-salmon" />
+                                        <WeeklyRow label="No Late Snacks" dates={weekDates} logs={dailyLogs} checkFn={l => l.sleep?.noLSIB} colorClass="brand-purple" />
+                                        <WeeklyRow label="Bedtime < 12" dates={weekDates} logs={dailyLogs} checkFn={l => l.sleep?.bedtime} colorClass="brand-purple" />
                                     </div>
                                 )}
                                 {weeklyTab === 'sadhanas' && (
@@ -897,7 +908,7 @@ function App() {
                 const prevWeekKey = getLocalDateString(prevWeekStart);
                 const prevWeekGoals = weeklyGoals[prevWeekKey] || {};
 
-                const countDaily = (checkFn) => weekDates.filter(date => checkFn(dailyLogs[date] || INITIAL_DAILY)).length;
+                const countDaily = (checkFn) => weekDates.filter(date => checkFn(dailyLogs[date] || INITIAL_DAILY, date)).length;
                 const countPb = (checkFn) => weekDates.filter(date => checkFn(pbLogs[date] || INITIAL_PB)).length;
 
                 const goalSections = {
@@ -910,11 +921,11 @@ function App() {
                         { key: 'makeBedCleanRoom', label: 'Make bed & clean room', actual: countDaily(log => log.morningHabits?.makeBedCleanRoom), color: 'from-brand-mint to-brand-teal' },
                     ],
                     night: [
-                        { key: 'sdrEarly', label: 'SDR Completed Early', actual: countDaily(log => getShutdownRoutineStatus(log) === 'early'), color: 'from-brand-purple to-brand-periwinkle' },
-                        { key: 'workdayEndEarly', label: 'Workday End Early', actual: countDaily(log => getWorkdayEndStatus(log) === 'early'), color: 'from-brand-blue to-brand-periwinkle' },
-                        { key: 'sleepLights', label: 'Sleep Lights Off', actual: countDaily(log => log.sleep?.lights), color: 'from-brand-yellow to-brand-orange' },
+                        { key: 'sdrEarly', label: 'SDR Completed Early', actual: countDaily((log, date) => getShutdownRoutineStatus(log, date) === 'early'), color: 'from-brand-purple to-brand-periwinkle' },
+                        { key: 'workdayEndEarly', label: 'Workday End Early', actual: countDaily((log, date) => getWorkdayEndStatus(log, date) === 'early'), color: 'from-brand-blue to-brand-periwinkle' },
+                        { key: 'sleepLights', label: 'Sleep Lights Off', actual: countDaily(log => log.sleep?.lights), color: 'from-brand-periwinkle to-brand-blue' },
                         { key: 'noTv', label: 'No TV / Soundscapes', actual: countDaily(log => log.sleep?.tv), color: 'from-brand-blue to-brand-periwinkle' },
-                        { key: 'noLateSnacks', label: 'No Late Snacks', actual: countDaily(log => log.sleep?.noLSIB), color: 'from-brand-mint to-brand-teal' },
+                        { key: 'noLateSnacks', label: 'No Late Snacks', actual: countDaily(log => log.sleep?.noLSIB), color: 'from-brand-purple to-brand-periwinkle' },
                         { key: 'bedtime', label: 'Bedtime < Midnight', actual: countDaily(log => log.sleep?.bedtime), color: 'from-brand-purple to-brand-periwinkle' },
                     ],
                     sadhanas: [
@@ -1172,9 +1183,9 @@ function App() {
                                 <div>
                                     <h3 className="text-sm font-extrabold text-stone-400 uppercase tracking-[0.22em] mb-5 border-b border-stone-200 pb-2">Habits</h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <SimpleBarChart title="Sleep Lights Off" data={trends.map(t => ({ label: t.label, value: t.lights }))} color="bg-brand-yellow" chartMax={100} />
+                                        <SimpleBarChart title="Sleep Lights Off" data={trends.map(t => ({ label: t.label, value: t.lights }))} color="bg-brand-periwinkle" chartMax={100} />
                                         <SimpleBarChart title="No TV / Soundscapes" data={trends.map(t => ({ label: t.label, value: t.tv }))} color="bg-brand-blue" chartMax={100} />
-                                        <SimpleBarChart title="No Late Snacks" data={trends.map(t => ({ label: t.label, value: t.lsib }))} color="bg-gradient-to-r from-brand-mint to-brand-teal" chartMax={100} />
+                                        <SimpleBarChart title="No Late Snacks" data={trends.map(t => ({ label: t.label, value: t.lsib }))} color="bg-gradient-to-r from-brand-purple to-brand-periwinkle" chartMax={100} />
                                         <SimpleBarChart title="Bedtime < Midnight" data={trends.map(t => ({ label: t.label, value: t.bedtime }))} color="bg-brand-purple" chartMax={100} />
                                     </div>
                                 </div>
@@ -1317,8 +1328,8 @@ function App() {
                                         early={reviewStats.sdr.early}
                                         late={reviewStats.sdr.late}
                                         totalDays={reviewStats.totalDays}
-                                        gradientEarly="bg-gradient-to-r from-brand-purple to-brand-teal"
-                                        gradientLate="bg-gradient-to-r from-brand-purple/40 to-brand-teal/40"
+                                        gradientEarly="bg-gradient-to-r from-brand-purple to-brand-periwinkle"
+                                        gradientLate="bg-gradient-to-r from-brand-purple/40 to-brand-periwinkle/40"
                                     />
                                     <StackedBar
                                         label="Workday End"
@@ -1343,9 +1354,9 @@ function App() {
                                 <div className="bg-white p-8 rounded-3xl shadow-sm border border-stone-100">
                                     <h3 className="text-lg font-bold text-stone-800 mb-6 uppercase tracking-wider text-sm">Habits</h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-2">
-                                        <ProgressBar label="Lights Off" value={reviewStats.sleep.lights} max={reviewStats.totalDays} gradient="bg-gradient-to-r from-brand-yellow to-brand-orange" subLabel={`${reviewStats.sleep.lights}/${reviewStats.totalDays}`} />
+                                        <ProgressBar label="Lights Off" value={reviewStats.sleep.lights} max={reviewStats.totalDays} gradient="bg-gradient-to-r from-brand-periwinkle to-brand-blue" subLabel={`${reviewStats.sleep.lights}/${reviewStats.totalDays}`} />
                                         <ProgressBar label="No TV / Soundscapes" value={reviewStats.sleep.tv} max={reviewStats.totalDays} gradient="bg-brand-blue" subLabel={`${reviewStats.sleep.tv}/${reviewStats.totalDays}`} />
-                                        <ProgressBar label="No Late Snacks" value={reviewStats.sleep.lsib} max={reviewStats.totalDays} gradient="bg-gradient-to-r from-brand-mint to-brand-teal" subLabel={`${reviewStats.sleep.lsib}/${reviewStats.totalDays}`} />
+                                        <ProgressBar label="No Late Snacks" value={reviewStats.sleep.lsib} max={reviewStats.totalDays} gradient="bg-gradient-to-r from-brand-purple to-brand-periwinkle" subLabel={`${reviewStats.sleep.lsib}/${reviewStats.totalDays}`} />
                                         <ProgressBar label="Bedtime < Midnight" value={reviewStats.sleep.bed} max={reviewStats.totalDays} gradient="bg-gradient-to-r from-brand-periwinkle to-brand-purple" subLabel={`${reviewStats.sleep.bed}/${reviewStats.totalDays}`} />
                                     </div>
                                 </div>
@@ -1574,7 +1585,7 @@ function App() {
                                     <div className="space-y-3 mb-6">
                                         <div className="flex justify-between items-center mb-2">
                                             <label className="text-sm font-bold text-stone-500 uppercase">SDR Completed</label>
-                                            {statusBadge(getShutdownRoutineStatus(currentDaily), { earlyLabel: '\u{1F989} Good Owl', earlyClass: 'bg-brand-periwinkle/30 text-stone-700', lateClass: 'bg-brand-blue/30 text-blue-800' })}
+                                            {statusBadge(getShutdownRoutineStatus(currentDaily, selectedDate), { earlyLabel: '\u{1F989} Good Owl', earlyClass: 'bg-brand-periwinkle/30 text-stone-700', lateClass: 'bg-brand-blue/30 text-blue-800' })}
                                         </div>
                                         <div className="flex gap-2">
                                             <TimeInput24
@@ -1595,7 +1606,7 @@ function App() {
                                     <div className="mb-6">
                                         <div className="flex justify-between items-center mb-2">
                                             <label className="text-sm font-bold text-stone-500 uppercase">Workday End</label>
-                                            {statusBadge(getWorkdayEndStatus(currentDaily), { earlyLabel: '\u{1F989} Good Owl', earlyClass: 'bg-brand-periwinkle/30 text-stone-700', lateClass: 'bg-brand-blue/30 text-blue-800' })}
+                                            {statusBadge(getWorkdayEndStatus(currentDaily, selectedDate), { earlyLabel: '\u{1F989} Good Owl', earlyClass: 'bg-brand-periwinkle/30 text-stone-700', lateClass: 'bg-brand-blue/30 text-blue-800' })}
                                         </div>
                                         <div className="flex gap-2">
                                             <TimeInput24
@@ -1623,7 +1634,7 @@ function App() {
                                             label="Sleep Lights Off"
                                             checked={currentDaily.sleep.lights}
                                             onChange={(val) => updateDaily({ sleep: { ...currentDaily.sleep, lights: val } })}
-                                            activeClass="border-brand-yellow"
+                                            activeClass="border-brand-periwinkle"
                                         />
                                         <Toggle
                                             label="No TV / Soundscapes"
@@ -1635,7 +1646,7 @@ function App() {
                                             label="No Late Snacks"
                                             checked={currentDaily.sleep.noLSIB}
                                             onChange={(val) => updateDaily({ sleep: { ...currentDaily.sleep, noLSIB: val } })}
-                                            activeClass="border-brand-mint"
+                                            activeClass="border-brand-purple"
                                         />
                                         <Toggle
                                             label="Bedtime < Midnight"
@@ -1705,13 +1716,13 @@ function App() {
                                     <div className="bg-brand-purple/10 border border-brand-purple/20 rounded-2xl p-4">
                                         <div className="text-xs font-bold uppercase tracking-widest text-brand-purple mb-1">Shutdown Routine</div>
                                         <div className="font-bold text-stone-800">SDR Completed</div>
-                                        <div className="text-sm text-stone-500">Early before 22:45. Late at 22:45 or later.</div>
+                                        <div className="text-sm text-stone-500">Early before 23:00. Late at 23:00 or later.</div>
                                     </div>
 
                                     <div className="bg-brand-blue/10 border border-brand-blue/20 rounded-2xl p-4">
                                         <div className="text-xs font-bold uppercase tracking-widest text-brand-blue mb-1">Shutdown Routine</div>
                                         <div className="font-bold text-stone-800">Workday End</div>
-                                        <div className="text-sm text-stone-500">Early before 22:00. Late at 22:00 or later.</div>
+                                        <div className="text-sm text-stone-500">Early before 22:45. Late at 22:45 or later.</div>
                                     </div>
                                 </div>
 
