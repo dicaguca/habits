@@ -845,9 +845,9 @@ function App() {
                                         <WeeklyRow label="Workday End" dates={weekDates} logs={dailyLogs} isRitual={true} checkFn={(l, date) => getWorkdayEndStatus(l, date)} colorClass="brand-blue" />
                                         <div className="border-t border-dashed border-stone-200 my-2"></div>
                                         <div className="text-xs font-bold text-stone-400 uppercase tracking-[0.2em] pt-2 pb-1">Habits</div>
-                                        <WeeklyRow label="Sleep Lights Off" dates={weekDates} logs={dailyLogs} checkFn={l => l.sleep?.lights} colorClass="brand-periwinkle" />
+                                        <WeeklyRow label="Sleep Lights Off" dates={weekDates} logs={dailyLogs} checkFn={l => l.sleep?.lights} colorClass="brand-plum" />
                                         <WeeklyRow label="No TV / Sound" dates={weekDates} logs={dailyLogs} checkFn={l => l.sleep?.tv} colorClass="brand-blue" />
-                                        <WeeklyRow label="No Late Snacks" dates={weekDates} logs={dailyLogs} checkFn={l => l.sleep?.noLSIB} colorClass="brand-purple" />
+                                        <WeeklyRow label="No Late Snacks" dates={weekDates} logs={dailyLogs} checkFn={l => l.sleep?.noLSIB} colorClass="brand-lagoon" />
                                         <WeeklyRow label="Bedtime < 12" dates={weekDates} logs={dailyLogs} checkFn={l => l.sleep?.bedtime} colorClass="brand-purple" />
                                     </div>
                                 )}
@@ -923,9 +923,9 @@ function App() {
                     night: [
                         { key: 'sdrEarly', label: 'SDR Completed Early', actual: countDaily((log, date) => getShutdownRoutineStatus(log, date) === 'early'), color: 'from-brand-purple to-brand-periwinkle' },
                         { key: 'workdayEndEarly', label: 'Workday End Early', actual: countDaily((log, date) => getWorkdayEndStatus(log, date) === 'early'), color: 'from-brand-blue to-brand-periwinkle' },
-                        { key: 'sleepLights', label: 'Sleep Lights Off', actual: countDaily(log => log.sleep?.lights), color: 'from-brand-periwinkle to-brand-blue' },
+                        { key: 'sleepLights', label: 'Sleep Lights Off', actual: countDaily(log => log.sleep?.lights), color: 'from-brand-plum to-brand-periwinkle' },
                         { key: 'noTv', label: 'No TV / Soundscapes', actual: countDaily(log => log.sleep?.tv), color: 'from-brand-blue to-brand-periwinkle' },
-                        { key: 'noLateSnacks', label: 'No Late Snacks', actual: countDaily(log => log.sleep?.noLSIB), color: 'from-brand-purple to-brand-periwinkle' },
+                        { key: 'noLateSnacks', label: 'No Late Snacks', actual: countDaily(log => log.sleep?.noLSIB), color: 'from-brand-lagoon to-brand-periwinkle' },
                         { key: 'bedtime', label: 'Bedtime < Midnight', actual: countDaily(log => log.sleep?.bedtime), color: 'from-brand-purple to-brand-periwinkle' },
                     ],
                     sadhanas: [
@@ -1183,9 +1183,9 @@ function App() {
                                 <div>
                                     <h3 className="text-sm font-extrabold text-stone-400 uppercase tracking-[0.22em] mb-5 border-b border-stone-200 pb-2">Habits</h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <SimpleBarChart title="Sleep Lights Off" data={trends.map(t => ({ label: t.label, value: t.lights }))} color="bg-brand-periwinkle" chartMax={100} />
+                                        <SimpleBarChart title="Sleep Lights Off" data={trends.map(t => ({ label: t.label, value: t.lights }))} color="bg-brand-plum" chartMax={100} />
                                         <SimpleBarChart title="No TV / Soundscapes" data={trends.map(t => ({ label: t.label, value: t.tv }))} color="bg-brand-blue" chartMax={100} />
-                                        <SimpleBarChart title="No Late Snacks" data={trends.map(t => ({ label: t.label, value: t.lsib }))} color="bg-gradient-to-r from-brand-purple to-brand-periwinkle" chartMax={100} />
+                                        <SimpleBarChart title="No Late Snacks" data={trends.map(t => ({ label: t.label, value: t.lsib }))} color="bg-gradient-to-r from-brand-lagoon to-brand-periwinkle" chartMax={100} />
                                         <SimpleBarChart title="Bedtime < Midnight" data={trends.map(t => ({ label: t.label, value: t.bedtime }))} color="bg-brand-purple" chartMax={100} />
                                     </div>
                                 </div>
@@ -1354,9 +1354,9 @@ function App() {
                                 <div className="bg-white p-8 rounded-3xl shadow-sm border border-stone-100">
                                     <h3 className="text-lg font-bold text-stone-800 mb-6 uppercase tracking-wider text-sm">Habits</h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-2">
-                                        <ProgressBar label="Lights Off" value={reviewStats.sleep.lights} max={reviewStats.totalDays} gradient="bg-gradient-to-r from-brand-periwinkle to-brand-blue" subLabel={`${reviewStats.sleep.lights}/${reviewStats.totalDays}`} />
+                                        <ProgressBar label="Lights Off" value={reviewStats.sleep.lights} max={reviewStats.totalDays} gradient="bg-gradient-to-r from-brand-plum to-brand-periwinkle" subLabel={`${reviewStats.sleep.lights}/${reviewStats.totalDays}`} />
                                         <ProgressBar label="No TV / Soundscapes" value={reviewStats.sleep.tv} max={reviewStats.totalDays} gradient="bg-brand-blue" subLabel={`${reviewStats.sleep.tv}/${reviewStats.totalDays}`} />
-                                        <ProgressBar label="No Late Snacks" value={reviewStats.sleep.lsib} max={reviewStats.totalDays} gradient="bg-gradient-to-r from-brand-purple to-brand-periwinkle" subLabel={`${reviewStats.sleep.lsib}/${reviewStats.totalDays}`} />
+                                        <ProgressBar label="No Late Snacks" value={reviewStats.sleep.lsib} max={reviewStats.totalDays} gradient="bg-gradient-to-r from-brand-lagoon to-brand-periwinkle" subLabel={`${reviewStats.sleep.lsib}/${reviewStats.totalDays}`} />
                                         <ProgressBar label="Bedtime < Midnight" value={reviewStats.sleep.bed} max={reviewStats.totalDays} gradient="bg-gradient-to-r from-brand-periwinkle to-brand-purple" subLabel={`${reviewStats.sleep.bed}/${reviewStats.totalDays}`} />
                                     </div>
                                 </div>
@@ -1634,7 +1634,7 @@ function App() {
                                             label="Sleep Lights Off"
                                             checked={currentDaily.sleep.lights}
                                             onChange={(val) => updateDaily({ sleep: { ...currentDaily.sleep, lights: val } })}
-                                            activeClass="border-brand-periwinkle"
+                                            activeClass="border-brand-plum"
                                         />
                                         <Toggle
                                             label="No TV / Soundscapes"
@@ -1646,7 +1646,7 @@ function App() {
                                             label="No Late Snacks"
                                             checked={currentDaily.sleep.noLSIB}
                                             onChange={(val) => updateDaily({ sleep: { ...currentDaily.sleep, noLSIB: val } })}
-                                            activeClass="border-brand-purple"
+                                            activeClass="border-brand-lagoon"
                                         />
                                         <Toggle
                                             label="Bedtime < Midnight"
