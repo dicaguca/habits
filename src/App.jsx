@@ -28,6 +28,7 @@ function App() {
             const [currentGoalsWeekStart, setCurrentGoalsWeekStart] = useState(() => getSundayDate(getLocalDateString()));
             const [showRulesModal, setShowRulesModal] = useState(false);
             const [trendsTab, setTrendsTab] = useState('morning');
+            const [trendsRange, setTrendsRange] = useState('12m'); // '6m', '12m', or a year like '2026'
 
             // --- INITIAL STATE ---
             const [dailyLogs, setDailyLogs] = useState(() => {
@@ -453,6 +454,7 @@ function App() {
                     const shortMonth = new Date(m + '-02').toLocaleDateString('en-US', { month: 'short' });
 
                     return {
+                        month: m,
                         label: shortMonth,
                         morningGoals: averageGoalAchievement('morning'),
                         nightGoals: averageGoalAchievement('night'),
@@ -484,7 +486,18 @@ function App() {
                     };
                 });
             };
-            const trends = useMemo(() => calculateTrends(), [dailyLogs, pbLogs, weeklyGoals]);
+            const allTrends = useMemo(() => calculateTrends(), [dailyLogs, pbLogs, weeklyGoals]);
+            const trendsYears = [...new Set(allTrends.map(t => t.month.slice(0, 4)))].sort().reverse();
+            const trends = useMemo(() => {
+                if (trendsRange === '6m' || trendsRange === '12m') {
+                    const monthCount = trendsRange === '6m' ? 6 : 12;
+                    const [y, mo] = getLocalDateString().split('-').map(Number);
+                    const start = new Date(y, mo - monthCount, 1);
+                    const startMonth = `${start.getFullYear()}-${String(start.getMonth() + 1).padStart(2, '0')}`;
+                    return allTrends.filter(t => t.month >= startMonth);
+                }
+                return allTrends.filter(t => t.month.startsWith(trendsRange));
+            }, [allTrends, trendsRange]);
 
             const getReviewStats = (month) => {
                 const dailyDates = Object.keys(dailyLogs).filter(d => d.startsWith(month));
@@ -1104,7 +1117,29 @@ function App() {
                                 <span className="bg-brand-mint/20 text-brand-mint p-2 rounded-xl"><Icons.Trends /></span>
                                 Monthly Trends
                             </h2>
-                            <button onClick={() => setShowComparison(false)} className="bg-stone-200 hover:bg-stone-300 p-2 rounded-full transition-colors text-stone-500"><Icons.X /></button>
+                            <div className="flex items-center gap-4">
+                                <div className="flex items-center gap-2">
+                                    {[['6m', '6 months'], ['12m', '12 months']].map(([value, label]) => (
+                                        <button
+                                            key={value}
+                                            onClick={() => setTrendsRange(value)}
+                                            className={`px-4 py-2 rounded-xl font-bold border transition-colors ${trendsRange === value ? 'bg-brand-mint text-white border-brand-mint' : 'bg-stone-50 text-stone-600 border-stone-200 hover:bg-stone-100'}`}
+                                        >
+                                            {label}
+                                        </button>
+                                    ))}
+                                    <select
+                                        value={trendsYears.includes(trendsRange) ? trendsRange : ''}
+                                        onChange={(e) => setTrendsRange(e.target.value)}
+                                        className={`rounded-xl px-4 py-2 font-bold border outline-none ${trendsYears.includes(trendsRange) ? 'bg-brand-mint text-white border-brand-mint' : 'bg-stone-50 text-stone-600 border-stone-200'}`}
+                                        aria-label="Trends year"
+                                    >
+                                        <option value="" disabled className="bg-white text-stone-600">Year</option>
+                                        {trendsYears.map(y => <option key={y} value={y} className="bg-white text-stone-600">{y}</option>)}
+                                    </select>
+                                </div>
+                                <button onClick={() => setShowComparison(false)} className="bg-stone-200 hover:bg-stone-300 p-2 rounded-full transition-colors text-stone-500"><Icons.X /></button>
+                            </div>
                         </div>
 
                         <div className="flex gap-4 mb-10">
